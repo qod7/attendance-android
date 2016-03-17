@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.passion.attendance.SquareLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="right|center_vertical">
+
+        <TextView
+            android:id="@+id/date_of_month"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="5dp"
+            android:gravity="center_vertical"
+            android:text="13"
+            android:textColor="@color/Black"
+            android:textSize="15sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/event_indicator"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/Orange"
+        android:paddingBottom="2dp"
+        android:paddingTop="2dp">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="right|center_vertical">
+
+            <View
+                android:id="@+id/attendance_indicator"
+                android:layout_width="5dp"
+                android:layout_height="5dp"
+                android:layout_marginLeft="5dp"
+                android:background="@drawable/presence_indicator" />
+
+            <View
+                android:id="@+id/notice_indicator"
+                android:layout_width="5dp"
+                android:layout_height="5dp"
+                android:layout_marginLeft="5dp"
+                android:background="@drawable/notice_indicator" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/alternate_date_of_month"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:text="13"
+            android:textSize="12sp" />
+    </LinearLayout>
+</com.passion.attendance.SquareLinearLayout>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/content_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/list_item_background"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/content_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:clickable="false"
+        android:text="Title"
+        android:textAppearance="@android:style/TextAppearance.Large"
+        android:textColor="@color/DarkGray" />
+
+    <TextView
+        android:id="@+id/content_desc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:clickable="false"
+        android:text="Content goes here. It is a very long content. Hope I can make it so that it overflows"
+        android:textColor="@color/Gray" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2px"
+        android:layout_marginTop="5dp"
+        android:background="@color/LightGrey" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:padding="5dp">
+
+        <TextView
+            android:id="@+id/content_date"
+            android:layout_width="0dp"
+            android:clickable="false"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Dec 24, 2015"
+            android:textColor="@color/Gray" />
+
+        <ImageButton
+            android:id="@+id/content_reply_button"
+            style="@style/QuickActionButtons"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_message" />
+
+        <ImageButton
+            android:id="@+id/content_delete_button"
+            style="@style/QuickActionButtons"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_delete" />
+    </LinearLayout>
+</LinearLayout>
