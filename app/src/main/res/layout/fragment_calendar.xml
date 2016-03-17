@@ -97,6 +97,7 @@
         android:id="@+id/calendar_gridview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:listSelector="@color/Transparent"
         android:paddingLeft="20dp"
         android:paddingRight="20dp"
         android:numColumns="7" />

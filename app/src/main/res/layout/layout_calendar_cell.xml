@@ -2,60 +2,62 @@
 <com.passion.attendance.SquareLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="horizontal">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="right|center_vertical">
+        android:layout_height="match_parent"
+        android:background="@drawable/calendar_cell_background"
+        android:id="@+id/calendar_cell"
+        android:gravity="center"
+        android:layout_margin="2dp"
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/date_of_month"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="5dp"
-            android:gravity="center_vertical"
             android:text="13"
             android:textColor="@color/Black"
             android:textSize="15sp" />
-    </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/event_indicator"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/Orange"
-        android:paddingBottom="2dp"
-        android:paddingTop="2dp">
 
         <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="right|center_vertical">
+            android:id="@+id/hud_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal">
 
             <View
                 android:id="@+id/attendance_indicator"
-                android:layout_width="5dp"
-                android:layout_height="5dp"
-                android:layout_marginLeft="5dp"
+                android:layout_width="3dp"
+                android:layout_height="3dp"
+                android:layout_marginLeft="1dp"
+                android:layout_marginRight="1dp"
                 android:background="@drawable/presence_indicator" />
 
             <View
                 android:id="@+id/notice_indicator"
-                android:layout_width="5dp"
-                android:layout_height="5dp"
-                android:layout_marginLeft="5dp"
+                android:layout_width="3dp"
+                android:layout_height="3dp"
+                android:layout_marginLeft="1dp"
+                android:layout_marginRight="1dp"
                 android:background="@drawable/notice_indicator" />
+
+            <View
+                android:id="@+id/event_indicator"
+                android:layout_width="3dp"
+                android:layout_height="3dp"
+                android:layout_marginLeft="1dp"
+                android:layout_marginRight="1dp"
+                android:background="@drawable/events_indicator" />
+
         </LinearLayout>
 
         <TextView
             android:id="@+id/alternate_date_of_month"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
             android:text="13"
             android:textSize="12sp" />
     </LinearLayout>

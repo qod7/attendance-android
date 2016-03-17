@@ -78,14 +78,17 @@ public class CalendarAdapter extends BaseAdapter {
             convertView = vi.inflate(R.layout.layout_calendar_cell, null);
         }
 
-        TextView DateOfMonth = (TextView) convertView.findViewById(R.id.date_of_month);
-        TextView AltDateOfMonth = (TextView) convertView.findViewById(R.id.alternate_date_of_month);
+        TextView dateOfMonth = (TextView) convertView.findViewById(R.id.date_of_month);
+        TextView altDateOfMonth = (TextView) convertView.findViewById(R.id.alternate_date_of_month);
 
-        DateOfMonth.setTextColor(Color.BLACK);
+        View calendarCell = convertView.findViewById(R.id.calendar_cell);
 
-        View AttendanceIndicator = convertView.findViewById(R.id.attendance_indicator),
-                NoticeIndicator = convertView.findViewById(R.id.notice_indicator),
-                EventIndicator = convertView.findViewById(R.id.event_indicator);
+        dateOfMonth.setTextColor(Color.BLACK);
+
+        View attendanceIndicator = convertView.findViewById(R.id.attendance_indicator),
+                noticeIndicator = convertView.findViewById(R.id.notice_indicator),
+                eventIndicator = convertView.findViewById(R.id.event_indicator),
+                hudContainer = convertView.findViewById(R.id.hud_container);
 
         {
             Random rand = new Random();
@@ -95,18 +98,17 @@ public class CalendarAdapter extends BaseAdapter {
 
             int VISIBLE = View.VISIBLE, GONE = View.GONE;
 
-            if (value1) AttendanceIndicator.setVisibility(VISIBLE);
-            else AttendanceIndicator.setVisibility(GONE);
+            if (value1) attendanceIndicator.setVisibility(VISIBLE);
+            else attendanceIndicator.setVisibility(GONE);
 
-            if (value2) NoticeIndicator.setVisibility(VISIBLE);
-            else NoticeIndicator.setVisibility(GONE);
+            if (value2) noticeIndicator.setVisibility(VISIBLE);
+            else noticeIndicator.setVisibility(GONE);
 
-            if (value3)
-                EventIndicator.setBackgroundColor(ContextCompat.getColor(context, R.color.Transparent));
-            else EventIndicator.setBackgroundColor(ContextCompat.getColor(context, R.color.Orange));
+            if (value3) eventIndicator.setVisibility(VISIBLE);
+            else eventIndicator.setVisibility(GONE);
         }
 
-        int dayOfMonth = 0, altdayOfMonth = 0;
+        int dayOfMonth = 0, altDayOfMonth;
         boolean currentMonth = false;
 
         try {
@@ -123,34 +125,46 @@ public class CalendarAdapter extends BaseAdapter {
         Calendar cal = Calendar.getInstance();
         cal.setTime(DateList.get(position));
 
-        altdayOfMonth = cal.get(Calendar.DAY_OF_MONTH);
+        altDayOfMonth = cal.get(Calendar.DAY_OF_MONTH);
 
-        DateOfMonth.setText(String.valueOf(dayOfMonth));
-        AltDateOfMonth.setText(String.valueOf(altdayOfMonth));
+        dateOfMonth.setText(String.valueOf(dayOfMonth));
+        altDateOfMonth.setText(String.valueOf(altDayOfMonth));
 
-        View Background = convertView.findViewById(R.id.calendar_cell_background);
+        // Checking if current date is in current month
         if (currentMonth) {
+            // If current date is in current month
+            hudContainer.setVisibility(View.VISIBLE);
+
+            dateOfMonth.setTextColor(ContextCompat.getColor(context, R.color.Black));
+            altDateOfMonth.setTextColor(ContextCompat.getColor(context, R.color.Gray));
+
+            // Checking if displayed date is today
             Calendar today = Calendar.getInstance();
             if (today.get(Calendar.YEAR) == cal.get(Calendar.YEAR)
                     && today.get(Calendar.MONTH) == cal.get(Calendar.MONTH)
                     && today.get(Calendar.DAY_OF_MONTH) == cal.get(Calendar.DAY_OF_MONTH)) {
+                // If current date is today
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                    convertView.setBackground(ContextCompat.getDrawable(context, R.drawable.calendar_cell_today_background));
+                    calendarCell.setBackground(ContextCompat.getDrawable(context, R.drawable.calendar_cell_today_background));
                 } else {
-                    convertView.setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.calendar_cell_today_background));
+                    calendarCell.setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.calendar_cell_today_background));
                 }
             } else {
+                // If current date is not today
                 Calendar selected = Calendar.getInstance();
                 selected.setTime(mSelected);
+                // Checking if current date is selected
                 if (!(selected.get(Calendar.YEAR) == cal.get(Calendar.YEAR)
                         && selected.get(Calendar.MONTH) == cal.get(Calendar.MONTH)
                         && selected.get(Calendar.DAY_OF_MONTH) == cal.get(Calendar.DAY_OF_MONTH))) {
+                    // If current date is not selected
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                         convertView.setBackground(ContextCompat.getDrawable(context, R.drawable.calendar_cell_background));
                     } else {
                         convertView.setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.calendar_cell_background));
                     }
                 } else {
+                    // If current date is selected
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                         convertView.setBackground(ContextCompat.getDrawable(context, R.drawable.calendar_cell_highlighted_background));
                     } else {
@@ -158,10 +172,12 @@ public class CalendarAdapter extends BaseAdapter {
                     }
                 }
             }
-            EventIndicator.setVisibility(View.VISIBLE);
         } else {
-            Background.setBackgroundColor(ContextCompat.getColor(context, R.color.Gray));
-            EventIndicator.setVisibility(View.INVISIBLE);
+            // If current date is not in current month
+            hudContainer.setVisibility(View.INVISIBLE);
+
+            dateOfMonth.setTextColor(ContextCompat.getColor(context, R.color.LightGrey));
+            altDateOfMonth.setTextColor(ContextCompat.getColor(context, R.color.LightGrey));
         }
 
         return convertView;
