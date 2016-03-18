@@ -1,7 +1,9 @@
 package com.passion.attendance;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -25,14 +27,14 @@ import java.util.List;
 
 public class OverviewActivity extends AppCompatActivity {
 
-    CalendarFragment CalendarView;
-    View CalendarContainer;
-    int ChildCount, CurrentChild = -1;
-    ViewGroup OverViewView;
-    StaticListView EventListView;
-    ScrollView OverViewScrollView;
+    CalendarFragment mCalendarView;
+    View mCalendarContainer;
+    int mChildCount, mCurrentChild = -1;
+    ViewGroup mOverViewView;
+    StaticListView mEventListView;
+    ScrollView mOverViewScrollView;
 
-    Integer SelectedDay, SelectedMonth, SelectedYear;
+    Integer mSelectedDay, mSelectedMonth, mSelectedYear;
     private View HeaderView;
 
     @Override
@@ -40,10 +42,12 @@ public class OverviewActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_overview);
 
-        EventListView = (StaticListView) findViewById(R.id.events_list);
+        mEventListView = (StaticListView) findViewById(R.id.events_list);
 
-        OverViewView = (ViewGroup) findViewById(R.id.overview_container);
-        OverViewScrollView = (ScrollView) findViewById(R.id.overview_scrollview);
+        mOverViewView = (ViewGroup) findViewById(R.id.overview_container);
+        mOverViewScrollView = (ScrollView) findViewById(R.id.overview_scrollview);
+
+        final SwipeRefreshLayout swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.refresh_layout);
 
         List<Event> fileList = new ArrayList<>();
 
@@ -51,22 +55,22 @@ public class OverviewActivity extends AppCompatActivity {
 
         EventListAdapter e = new EventListAdapter(this, fileList);
 
-        EventListView.setAdapter(e);
+        mEventListView.setAdapter(e);
 
-        ChildCount = OverViewView.getChildCount();
-        CurrentChild = 0;
+        mChildCount = mOverViewView.getChildCount();
+        mCurrentChild = 0;
 
-        CalendarView = new CalendarFragment();
-        CalendarContainer = findViewById(R.id.calendar_container);
+        mCalendarView = new CalendarFragment();
+        mCalendarContainer = findViewById(R.id.calendar_container);
 
         Calendar today = Calendar.getInstance();
 
-        SelectedDay = today.get(Calendar.DAY_OF_MONTH);
-        SelectedMonth = today.get(Calendar.MONTH);
-        SelectedYear = today.get(Calendar.YEAR);
+        mSelectedDay = today.get(Calendar.DAY_OF_MONTH);
+        mSelectedMonth = today.get(Calendar.MONTH);
+        mSelectedYear = today.get(Calendar.YEAR);
         InitializeCalendar();
 
-        EventListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mEventListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Log.i("LISTVIEW", "Item " + i + " pressed");
@@ -74,20 +78,20 @@ public class OverviewActivity extends AppCompatActivity {
             }
         });
 
-        EventListView.setOnTouchListener(new ListView.OnTouchListener() {
+        mEventListView.setOnTouchListener(new ListView.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 int action = event.getAction();
                 switch (action) {
                     case MotionEvent.ACTION_MOVE:
                         // Allow ScrollView to intercept touch events.
-                        OverViewScrollView.requestDisallowInterceptTouchEvent(false);
+                        mOverViewScrollView.requestDisallowInterceptTouchEvent(false);
                         return false;
 //                        break;
 
                     default:
                         // Disallow ScrollView to intercept touch events.
-                        OverViewScrollView.requestDisallowInterceptTouchEvent(true);
+                        mOverViewScrollView.requestDisallowInterceptTouchEvent(true);
                         // Handle ListView touch events.
                         v.onTouchEvent(event);
                         return true;
@@ -99,7 +103,7 @@ public class OverviewActivity extends AppCompatActivity {
             }
         });
 
-        CalendarView.setCalendarListener(new CalendarListener() {
+        mCalendarView.setCalendarListener(new CalendarListener() {
             @Override
             public void onViewCreated() {
                 Toast.makeText(OverviewActivity.this, "View Created", Toast.LENGTH_SHORT).show();
@@ -115,18 +119,18 @@ public class OverviewActivity extends AppCompatActivity {
                 Calendar Selected = Calendar.getInstance();
                 Selected.setTime(date);
 
-                SelectedMonth = Selected.get(Calendar.MONTH);
-                SelectedYear = Selected.get(Calendar.YEAR);
-                SelectedDay = Selected.get(Calendar.DAY_OF_MONTH);
+                mSelectedMonth = Selected.get(Calendar.MONTH);
+                mSelectedYear = Selected.get(Calendar.YEAR);
+                mSelectedDay = Selected.get(Calendar.DAY_OF_MONTH);
 
-                Integer[] tempDate = {SelectedYear, SelectedMonth, SelectedDay};
+                Integer[] tempDate = {mSelectedYear, mSelectedMonth, mSelectedDay};
 
                 try {
                     NepaliDate selectedNepaliDate = NepaliCalendar.convertGregorianToNepaliDate(date),
-                            currentNepaliDate = CalendarView.getCalendarAdapter().getSelectedNepaliDate();
+                            currentNepaliDate = mCalendarView.getCalendarAdapter().getSelectedNepaliDate();
                     if (selectedNepaliDate.getMonthNumber() == currentNepaliDate.getMonthNumber()) {
-                        int y = (int) CalendarContainer.getY();
-                        OverViewScrollView.smoothScrollTo(0, y);
+                        int y = (int) mCalendarContainer.getY();
+                        mOverViewScrollView.smoothScrollTo(0, y);
                         Log.i("SCROLL", "Scrolled to " + y);
                     }
                 } catch (NepaliDateException e1) {
@@ -135,6 +139,19 @@ public class OverviewActivity extends AppCompatActivity {
 
                 Toast.makeText(OverviewActivity.this, "Date Selected", Toast.LENGTH_SHORT).show();
 
+            }
+        });
+
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                // Refresh the layout
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        swipeRefreshLayout.setRefreshing(false);
+                    }
+                }, 500);
             }
         });
     }
@@ -146,10 +163,10 @@ public class OverviewActivity extends AppCompatActivity {
 //        args.putInt(CalendarFragment.START_YEAR, 2072);
 //        args.putBoolean(CalendarFragment.START_WITH_NEPALI_DATE, true);
 
-//        CalendarView.setArguments(args);
+//        mCalendarView.setArguments(args);
 
         FragmentTransaction t = getSupportFragmentManager().beginTransaction();
-        t.replace(R.id.calendar_container, CalendarView);
+        t.replace(R.id.calendar_container, mCalendarView);
         t.commit();
     }
 
@@ -181,20 +198,20 @@ public class OverviewActivity extends AppCompatActivity {
 //    private void Scroll(float direction) {
 //        direction = (int) Math.signum(direction);
 //
-//        Boolean ScrollCondition = (CurrentChild == 0 && direction != 1) ||
-//                (CurrentChild == ChildCount - 1 && direction != -1) || (CurrentChild > 0 && CurrentChild < ChildCount - 1);
+//        Boolean ScrollCondition = (mCurrentChild == 0 && direction != 1) ||
+//                (mCurrentChild == mChildCount - 1 && direction != -1) || (mCurrentChild > 0 && mCurrentChild < mChildCount - 1);
 //
 //        if (ScrollCondition && !animating) {
 //            animating = true;
-//            CurrentChild -= direction;
+//            mCurrentChild -= direction;
 //            View PreviousChildView;
 //            if (direction == -1) {
-//                PreviousChildView = OverViewView.getChildAt(CurrentChild - 1);
+//                PreviousChildView = mOverViewView.getChildAt(mCurrentChild - 1);
 //            } else {
-//                PreviousChildView = OverViewView.getChildAt(CurrentChild);
+//                PreviousChildView = mOverViewView.getChildAt(mCurrentChild);
 //            }
 //
-//            final float oldY = OverViewView.getY(),
+//            final float oldY = mOverViewView.getY(),
 //                    newY = oldY + PreviousChildView.getHeight() * direction;
 //
 //            String dir = direction == -1?"UP":"DOWN";
@@ -202,7 +219,7 @@ public class OverviewActivity extends AppCompatActivity {
 //            Log.i("Animation Values", "Child Height: " + PreviousChildView.getHeight());
 //            Log.i("Animation Values", "oldY = " + oldY + ", newY = " + newY + ", direction = " + dir);
 //
-//            ObjectAnimator animator = ObjectAnimator.ofFloat(OverViewView, "y", oldY, newY);
+//            ObjectAnimator animator = ObjectAnimator.ofFloat(mOverViewView, "y", oldY, newY);
 //            animator.addListener(new Animator.AnimatorListener() {
 //                @Override
 //                public void onAnimationStart(Animator animator) {

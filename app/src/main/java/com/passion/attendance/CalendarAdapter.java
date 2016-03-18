@@ -27,7 +27,6 @@ public class CalendarAdapter extends BaseAdapter {
     private Calendar GregorianCalendar;
 
     private NepaliDate SelectedNepaliDate = null;
-    private NepaliDate SelectedDate = null;
 
     private List<Date> DateList;
 
@@ -137,61 +136,54 @@ public class CalendarAdapter extends BaseAdapter {
 
             dateOfMonth.setTextColor(ContextCompat.getColor(context, R.color.Black));
             altDateOfMonth.setTextColor(ContextCompat.getColor(context, R.color.Gray));
-
-            // Checking if displayed date is today
-            Calendar today = Calendar.getInstance();
-            if (today.get(Calendar.YEAR) == cal.get(Calendar.YEAR)
-                    && today.get(Calendar.MONTH) == cal.get(Calendar.MONTH)
-                    && today.get(Calendar.DAY_OF_MONTH) == cal.get(Calendar.DAY_OF_MONTH)) {
-                // If current date is today
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                    calendarCell.setBackground(ContextCompat.getDrawable(context, R.drawable.calendar_cell_today_background));
-                } else {
-                    calendarCell.setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.calendar_cell_today_background));
-                }
-            } else {
-                // If current date is not today
-                Calendar selected = Calendar.getInstance();
-                selected.setTime(mSelected);
-                // Checking if current date is selected
-                if (!(selected.get(Calendar.YEAR) == cal.get(Calendar.YEAR)
-                        && selected.get(Calendar.MONTH) == cal.get(Calendar.MONTH)
-                        && selected.get(Calendar.DAY_OF_MONTH) == cal.get(Calendar.DAY_OF_MONTH))) {
-                    // If current date is not selected
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                        calendarCell.setBackground(ContextCompat.getDrawable(context, R.drawable.calendar_cell_background));
-                    } else {
-                        calendarCell.setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.calendar_cell_background));
-                    }
-                } else {
-                    // If current date is selected
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                        calendarCell.setBackground(ContextCompat.getDrawable(context, R.drawable.calendar_cell_highlighted_background));
-                    } else {
-                        calendarCell.setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.calendar_cell_highlighted_background));
-                    }
-                }
-            }
         } else {
             // If current date is not in current month
             hudContainer.setVisibility(View.INVISIBLE);
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                calendarCell.setBackground(ContextCompat.getDrawable(context, R.drawable.calendar_cell_background));
-            } else {
-                calendarCell.setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.calendar_cell_background));
-            }
-
             dateOfMonth.setTextColor(ContextCompat.getColor(context, R.color.LightGrey));
             altDateOfMonth.setTextColor(ContextCompat.getColor(context, R.color.LightGrey));
         }
-
+        // Checking if displayed date is today
+        Calendar today = Calendar.getInstance();
+        if (today.get(Calendar.YEAR) == cal.get(Calendar.YEAR)
+                && today.get(Calendar.MONTH) == cal.get(Calendar.MONTH)
+                && today.get(Calendar.DAY_OF_MONTH) == cal.get(Calendar.DAY_OF_MONTH)) {
+            // If current date is today
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                calendarCell.setBackground(ContextCompat.getDrawable(context, R.drawable.calendar_cell_today_background));
+            } else {
+                calendarCell.setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.calendar_cell_today_background));
+            }
+        } else {
+            // If current date is not today
+            Calendar selected = Calendar.getInstance();
+            selected.setTime(mSelected);
+            // Checking if current date is selected
+            if (!(selected.get(Calendar.YEAR) == cal.get(Calendar.YEAR)
+                    && selected.get(Calendar.MONTH) == cal.get(Calendar.MONTH)
+                    && selected.get(Calendar.DAY_OF_MONTH) == cal.get(Calendar.DAY_OF_MONTH))) {
+                // If current date is not selected
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    calendarCell.setBackground(ContextCompat.getDrawable(context, R.drawable.calendar_cell_background));
+                } else {
+                    calendarCell.setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.calendar_cell_background));
+                }
+            } else {
+                // If current date is selected
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    calendarCell.setBackground(ContextCompat.getDrawable(context, R.drawable.calendar_cell_highlighted_background));
+                } else {
+                    calendarCell.setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.calendar_cell_highlighted_background));
+                }
+            }
+        }
         return convertView;
     }
 
     public void setCalendar(Date currentDate) {
         Calendar tempGregorianCalendar = GregorianCalendar;
         tempGregorianCalendar.setTime(currentDate);
+
 
         NepaliDate tempNepaliDate;
 

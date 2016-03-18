@@ -1,5 +1,9 @@
 package com.passion.attendance;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -85,6 +89,14 @@ public class PassionAttendance {
         } catch (JSONException e){
             return new HashMap<>();
         }
+    }
+
+    public static boolean isNetworkConnectionAvailable(Context context) {
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo info = cm.getActiveNetworkInfo();
+        if (info == null) return false;
+        NetworkInfo.State network = info.getState();
+        return (network == NetworkInfo.State.CONNECTED || network == NetworkInfo.State.CONNECTING);
     }
 
 }
