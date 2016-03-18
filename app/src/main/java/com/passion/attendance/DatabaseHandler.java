@@ -2,6 +2,7 @@ package com.passion.attendance;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
@@ -11,9 +12,11 @@ import android.util.Log;
 import com.passion.attendance.Models.Attendance;
 import com.passion.attendance.Models.Event;
 import com.passion.attendance.Models.Message;
+import com.passion.attendance.Models.Staff;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 
 /**
  * Created by Aayush on 3/10/2016.
@@ -161,6 +164,39 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
         db.close();
 
+    }
+
+    public void insertStaff(Staff staff){
+        SharedPreferences sp = context.getSharedPreferences(PassionAttendance.PREFERENCE_STAFF,
+                Context.MODE_PRIVATE);
+
+        sp.edit()
+                .putInt(PassionAttendance.KEY_ID, staff.getId())
+                .putString(PassionAttendance.KEY_NAME, staff.getName())
+                .putString(PassionAttendance.KEY_ORGANIZATION, staff.getOrganization())
+                .putString(PassionAttendance.KEY_IMAGE_URL, staff.getImageUrl())
+                .putString(PassionAttendance.KEY_CONTACT_NUMBER, staff.getContactNumber())
+                .putString(PassionAttendance.KEY_EXTRAS, PassionAttendance.getStringFromMap(staff.getExtras()))
+                .putString(PassionAttendance.KEY_PREFERENCES, PassionAttendance.getStringFromMap(staff.getPreferences()))
+                .apply();
+    }
+
+    public Staff retrieveStaff(){
+        SharedPreferences sp = context.getSharedPreferences(PassionAttendance.PREFERENCE_STAFF,
+                Context.MODE_PRIVATE);
+
+        Integer id = sp.getInt(PassionAttendance.KEY_ID, -1);
+        String name = sp.getString(PassionAttendance.KEY_NAME, "");
+        String organization = sp.getString(PassionAttendance.KEY_ORGANIZATION, "");
+        String image = sp.getString(PassionAttendance.KEY_IMAGE_URL, "");
+        String contact = sp.getString(PassionAttendance.KEY_CONTACT_NUMBER, "");
+
+        HashMap<String, String> extras = PassionAttendance.getMapFromString(sp.getString(PassionAttendance.KEY_EXTRAS,
+                ""));
+        HashMap<String, String> preferences = PassionAttendance.getMapFromString(sp.getString(PassionAttendance.KEY_PREFERENCES,
+                ""));
+
+        return new Staff(id, name, organization, image, contact, extras, preferences);
     }
 
     public ArrayList<Attendance> retrieveAttendances() {

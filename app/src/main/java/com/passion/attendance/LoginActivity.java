@@ -380,7 +380,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
 
             if (success) {
-                startActivityForResult(new Intent(LoginActivity.this, OverviewActivity.class), PassionAttendance.ACTIVTY_OVERVIEW);
+                Intent intent = new Intent(LoginActivity.this, OverviewActivity.class);
+                intent.putExtra(PassionAttendance.KEY_USER, mEmail);
+                intent.putExtra(PassionAttendance.KEY_PASSWORD, mPassword);
+
+                startActivityForResult(intent, PassionAttendance.ACTIVTY_OVERVIEW);
 //                finish();
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));

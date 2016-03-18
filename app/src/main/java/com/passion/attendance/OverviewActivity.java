@@ -14,7 +14,10 @@ import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.Toast;
 
+import com.passion.attendance.Models.Attendance;
 import com.passion.attendance.Models.Event;
+import com.passion.attendance.Models.Message;
+import com.passion.attendance.Models.Staff;
 
 import org.inf.nepalicalendar.NepaliCalendar;
 import org.inf.nepalicalendar.NepaliDate;
@@ -34,6 +37,10 @@ public class OverviewActivity extends AppCompatActivity {
     StaticListView mEventListView;
     ScrollView mOverViewScrollView;
 
+    SwipeRefreshLayout mSwipeRefreshLayout;
+
+    DatabaseHandler mDatabaseHandler;
+
     Integer mSelectedDay, mSelectedMonth, mSelectedYear;
     private View HeaderView;
 
@@ -47,7 +54,7 @@ public class OverviewActivity extends AppCompatActivity {
         mOverViewView = (ViewGroup) findViewById(R.id.overview_container);
         mOverViewScrollView = (ScrollView) findViewById(R.id.overview_scrollview);
 
-        final SwipeRefreshLayout swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.refresh_layout);
+        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.refresh_layout);
 
         List<Event> fileList = new ArrayList<>();
 
@@ -142,18 +149,68 @@ public class OverviewActivity extends AppCompatActivity {
             }
         });
 
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 // Refresh the layout
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        swipeRefreshLayout.setRefreshing(false);
+                        mSwipeRefreshLayout.setRefreshing(false);
                     }
                 }, 500);
             }
         });
+
+        loadData();
+    }
+
+    private void loadData() {
+        if (mDatabaseHandler == null)
+            mDatabaseHandler = new DatabaseHandler(this);
+
+        mSwipeRefreshLayout.setRefreshing(true);
+
+        ArrayList<String> headers = new ArrayList<>();
+        ArrayList<String> values = new ArrayList<>();
+
+        Staff staff = mDatabaseHandler.retrieveStaff();
+        if (staff.getId() == -1)
+            headers.add("get_staff");
+        else {
+
+            // Update the list of events
+            headers.add("get_events");
+            ArrayList<Event> Events = mDatabaseHandler.retrieveEvents();
+            if (Events.isEmpty())
+                values.add("-1");
+            else
+                values.add(String.valueOf(Events.get(Events.size() - 1).getId()));
+
+            // Update the list of messages
+            headers.add("get_messages");
+            ArrayList<Message> Messages = mDatabaseHandler.retrieveMessages();
+            if (Messages.isEmpty())
+                values.add("-1");
+            else
+                values.add(String.valueOf(Messages.get(Messages.size() - 1).getId()));
+
+            // Update the list of messages
+            headers.add("get_attendances");
+            ArrayList<Attendance> Attendances = mDatabaseHandler.retrieveAttendances();
+            if (Attendances.isEmpty())
+                values.add("-1");
+            else
+                values.add(String.valueOf(Attendances.get(Attendances.size() - 1).getId()));
+
+            // TODO Insert code for retrieving shifts
+            /*
+                Some code here
+             */
+
+
+        }
+
     }
 
     private void InitializeCalendar() {

@@ -51,6 +51,9 @@ public class PassionAttendance {
     public static final int ACTIVTY_LOGIN = 0;
     public static final int ACTIVTY_OVERVIEW = 1;
 
+    public static final String KEY_PASSWORD = "password";
+    public static final String KEY_USER = "user";
+
     public static String getStringFromArray(ArrayList<String> shifts) {
         StringBuilder sb = new StringBuilder();
         for (String shift : shifts) {
