@@ -16,17 +16,6 @@ import java.util.Iterator;
  * Created by Aayush on 12/9/2015.
  */
 public class PassionAttendance {
-    /**
-     * @param id
-     * @param name
-     * @param organization
-     * @param imageUrl
-     * @param contactNumber
-     * @param shift
-     * @param extras
-     * @param preferences
-     */
-
     public static final String PACKAGE_NAME = "com.passion.attendance";
     public static final String PREFERENCE_STAFF = "staff";
 
@@ -53,6 +42,9 @@ public class PassionAttendance {
 
     public static final String KEY_PASSWORD = "password";
     public static final String KEY_USER = "user";
+    public static final String KEY_TOKEN = "token";
+
+    public static final String HOST = "www.eattendance.com";
 
     public static String getStringFromArray(ArrayList<String> shifts) {
         StringBuilder sb = new StringBuilder();
@@ -78,7 +70,7 @@ public class PassionAttendance {
 
     public static HashMap<String, String> getMapFromString(String extras) {
         try {
-            HashMap<String, String> map = new HashMap<String, String>();
+            HashMap<String, String> map = new HashMap<>();
             JSONObject json = new JSONObject(extras);
 
             Iterator<?> keys = json.keys();

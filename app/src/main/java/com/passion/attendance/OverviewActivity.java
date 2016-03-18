@@ -1,5 +1,7 @@
 package com.passion.attendance;
 
+import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.FragmentTransaction;
@@ -23,10 +25,16 @@ import org.inf.nepalicalendar.NepaliCalendar;
 import org.inf.nepalicalendar.NepaliDate;
 import org.inf.nepalicalendar.NepaliDateException;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class OverviewActivity extends AppCompatActivity {
 
@@ -171,13 +179,18 @@ public class OverviewActivity extends AppCompatActivity {
 
         mSwipeRefreshLayout.setRefreshing(true);
 
+        SharedPreferences sp = getSharedPreferences(PassionAttendance.PACKAGE_NAME, MODE_PRIVATE);
+        String token = sp.getString(PassionAttendance.KEY_TOKEN, "");
+
         ArrayList<String> headers = new ArrayList<>();
         ArrayList<String> values = new ArrayList<>();
+        Boolean getStaff = false;
 
         Staff staff = mDatabaseHandler.retrieveStaff();
-        if (staff.getId() == -1)
+        if (staff.getId() == -1) {
             headers.add("get_staff");
-        else {
+            getStaff = true;
+        } else {
 
             // Update the list of events
             headers.add("get_events");
@@ -208,7 +221,28 @@ public class OverviewActivity extends AppCompatActivity {
                 Some code here
              */
 
+            // Send a GET request to the server to load data
+            OkHttpClient httpClient = new OkHttpClient();
+            String host = PassionAttendance.HOST;
 
+            Request.Builder requestBuilder = new Request.Builder()
+                    .addHeader("Authorization", String.format("Token %s", token));
+
+            HttpUrl.Builder urlBuilder = new HttpUrl.Builder()
+                    .addPathSegment("api")
+                    .addPathSegment("get_data");
+
+            for (int i = 0; i < headers.size(); i++)
+                urlBuilder.addQueryParameter(headers.get(i), values.get(i));
+
+            HttpUrl url = urlBuilder.build();
+
+            Request request = requestBuilder.url(url)
+                    .build();
+
+            Object[] params = {httpClient, request};
+
+            new LoadUserData().execute(params);
         }
 
     }
@@ -225,6 +259,28 @@ public class OverviewActivity extends AppCompatActivity {
         FragmentTransaction t = getSupportFragmentManager().beginTransaction();
         t.replace(R.id.calendar_container, mCalendarView);
         t.commit();
+    }
+
+    public class LoadUserData extends AsyncTask<Object, Void, Boolean> {
+
+        @Override
+        protected Boolean doInBackground(Object... params) {
+            OkHttpClient httpClient = (OkHttpClient) params[0];
+            Request request = (Request) params[1];
+
+            try {
+                Response response = httpClient.newCall(request).execute();
+            } catch (IOException e) {
+                return false;
+            }
+
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            mSwipeRefreshLayout.setRefreshing(false);
+        }
     }
 
 //    @Override
