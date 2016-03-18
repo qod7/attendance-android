@@ -31,8 +31,19 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import okhttp3.HttpUrl;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -46,13 +57,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      */
     private static final int REQUEST_READ_CONTACTS = 0;
 
-    /**
-     * A dummy authentication store containing known user names and passwords.
-     * TODO: remove after connecting to a real authentication system.
-     */
-    private static final String[] DUMMY_CREDENTIALS = new String[]{
-            "foo@example.com:hello", "bar@example.com:world"
-    };
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
@@ -204,8 +208,42 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         // perform the user login attempt.
         showProgress(true);
         if (PassionAttendance.isNetworkConnectionAvailable(this)) {
+            // Send a POST request to the server to load data
+            OkHttpClient httpClient = new OkHttpClient();
+            String host = PassionAttendance.HOST;
+            final MediaType mediaType = MediaType.parse("application/json");
+
+            JSONObject j = new JSONObject();
+            try {
+                j.put(PassionAttendance.KEY_ID, userId);
+                j.put(PassionAttendance.KEY_PASSWORD, password);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            String body = j.toString();
+
+            Request.Builder requestBuilder = new Request.Builder()
+                    .post(RequestBody.create(mediaType, body))
+                    .addHeader("content-type", "application/json")
+                    .addHeader("cache-control", "no-cache");
+
+            HttpUrl.Builder urlBuilder = new HttpUrl.Builder();
+
+            HttpUrl url = new HttpUrl.Builder()
+                    .scheme("http")
+                    .host(host)
+                    .addPathSegment("login")
+                    .build();
+
+            Request request = requestBuilder.url(url)
+                    .build();
+
+            Object[] params = {httpClient, request};
+
+
             mAuthTask = new UserLoginTask(userId, password);
-            mAuthTask.execute((Void) null);
+            mAuthTask.execute(params);
         } else {
             Dialog dialog = new AlertDialog.Builder(this)
                     .setTitle("No Network")
@@ -310,6 +348,54 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     }
 
+    private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
+        //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
+        ArrayAdapter<String> adapter =
+                new ArrayAdapter<>(LoginActivity.this,
+                        android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
+
+        mUserIdView.setAdapter(adapter);
+    }
+
+    private void showConnectionErrorMessage() {
+        Dialog dialog = new AlertDialog.Builder(LoginActivity.this)
+                .setTitle("No Network")
+                .setMessage("Cannot connect to server right now")
+                .setNeutralButton("Ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        showProgress(false);
+                    }
+                })
+                .create();
+        dialog.show();
+
+        mUserIdView.requestFocus();
+    }
+
+    private void startActivtyWithDummyCredentials() {
+        Intent intent = new Intent(LoginActivity.this, OverviewActivity.class);
+
+        intent.putExtra(PassionAttendance.KEY_USER, PassionAttendance.DUMMY_EMAIL);
+        intent.putExtra(PassionAttendance.KEY_PASSWORD, PassionAttendance.DUMMY_PASSWORD);
+        intent.putExtra(PassionAttendance.KEY_TOKEN, PassionAttendance.DUMMY_PASSWORD);
+
+        startActivityForResult(intent, PassionAttendance.ACTIVTY_OVERVIEW);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode) {
+            case PassionAttendance.ACTIVTY_OVERVIEW:
+                finish();
+                break;
+            default:
+                break;
+        }
+    }
+
     private interface ProfileQuery {
         String[] PROJECTION = {
                 ContactsContract.CommonDataKinds.Email.ADDRESS,
@@ -320,24 +406,16 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         int IS_PRIMARY = 1;
     }
 
-
-    private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
-        //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
-        ArrayAdapter<String> adapter =
-                new ArrayAdapter<>(LoginActivity.this,
-                        android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
-
-        mUserIdView.setAdapter(adapter);
-    }
-
     /**
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+    public class UserLoginTask extends AsyncTask<Object, Void, Boolean> {
 
         private final String mEmail;
         private final String mPassword;
+
+        private String mResponse;
 
         UserLoginTask(String email, String password) {
             mEmail = email;
@@ -345,25 +423,19 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
 
         @Override
-        protected Boolean doInBackground(Void... params) {
+        protected Boolean doInBackground(Object... params) {
             // TODO: attempt authentication against a network service.
 
+            OkHttpClient httpClient = (OkHttpClient) params[0];
+            Request request = (Request) params[1];
+
             try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
+                Response response = httpClient.newCall(request).execute();
+                mResponse = response.body().string();
+            } catch (IOException e) {
                 return false;
             }
 
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
-                }
-            }
-
-            // TODO: register the new account here.
             return true;
         }
 
@@ -378,17 +450,37 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             mAuthTask = null;
             showProgress(false);
 
-
             if (success) {
-                Intent intent = new Intent(LoginActivity.this, OverviewActivity.class);
-                intent.putExtra(PassionAttendance.KEY_USER, mEmail);
-                intent.putExtra(PassionAttendance.KEY_PASSWORD, mPassword);
+                try {
+                    JSONObject response = new JSONObject(mResponse);
 
-                startActivityForResult(intent, PassionAttendance.ACTIVTY_OVERVIEW);
-//                finish();
+                    Boolean status = response.getBoolean("status");
+
+                    if (status) {
+                        String token = response.getString("token");
+
+                        Intent intent = new Intent(LoginActivity.this, OverviewActivity.class);
+                        intent.putExtra(PassionAttendance.KEY_USER, mEmail);
+                        intent.putExtra(PassionAttendance.KEY_PASSWORD, mPassword);
+                        intent.putExtra(PassionAttendance.KEY_TOKEN, token);
+
+                        startActivityForResult(intent, PassionAttendance.ACTIVTY_OVERVIEW);
+                    }
+                } catch (JSONException e) {
+                    // If connection cannot be established, login with dummy credentials
+                    // in debug mode
+                    if (BuildConfig.DEBUG)
+                        startActivtyWithDummyCredentials();
+                    else
+                        showConnectionErrorMessage();
+                }
             } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
+                // If connection cannot be established, login with dummy credentials
+                // in debug mode
+                if (BuildConfig.DEBUG)
+                    startActivtyWithDummyCredentials();
+                else
+                    showConnectionErrorMessage();
             }
         }
 
@@ -396,19 +488,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         protected void onCancelled() {
             mAuthTask = null;
             showProgress(false);
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        switch (requestCode) {
-            case PassionAttendance.ACTIVTY_OVERVIEW:
-                finish();
-                break;
-            default:
-                break;
         }
     }
 }

@@ -19,6 +19,10 @@ public class PassionAttendance {
     public static final String PACKAGE_NAME = "com.passion.attendance";
     public static final String PREFERENCE_STAFF = "staff";
 
+    public static final String DUMMY_EMAIL = "aayush@subedi.com";
+    public static final String DUMMY_PASSWORD = "harikaji";
+    public static final String DUMMY_TOKEN = "mujiharikaji";
+
     public static final String KEY_ID = "id";
     public static final String KEY_NAME = "name";
     public static final String KEY_ORGANIZATION = "organization";

@@ -182,8 +182,13 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     }
 
     public Staff retrieveStaff(){
-        SharedPreferences sp = context.getSharedPreferences(PassionAttendance.PREFERENCE_STAFF,
-                Context.MODE_PRIVATE);
+        SharedPreferences sp;
+        try {
+            sp = context.getSharedPreferences(PassionAttendance.PREFERENCE_STAFF,
+                    Context.MODE_PRIVATE);
+        } catch (NullPointerException e) {
+            return null;
+        }
 
         Integer id = sp.getInt(PassionAttendance.KEY_ID, -1);
         String name = sp.getString(PassionAttendance.KEY_NAME, "");
@@ -311,9 +316,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public ArrayList<Message> retrieveMessages(Date d) {
         SQLiteDatabase db = getReadableDatabase();
         String Query;
-        Query = String.format("SELECT * FROM messages WHERE {} = \"{}\";",
+        Query = String.format(
+                "SELECT * FROM messages WHERE %s = \"%s\";",
                 PassionAttendance.KEY_SENT,
-                d.getTime());
+                d.getTime()
+        );
         Cursor c = db.rawQuery(Query, null);
 
         ArrayList<Message> messages = new ArrayList<>();
