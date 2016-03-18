@@ -1,7 +1,5 @@
 package com.passion.attendance;
 
-import android.app.Application;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -13,7 +11,7 @@ import java.util.Iterator;
 /**
  * Created by Aayush on 12/9/2015.
  */
-public class PassionAttendance extends Application {
+public class PassionAttendance {
     /**
      * @param id
      * @param name
@@ -46,8 +44,8 @@ public class PassionAttendance extends Application {
     public static final String KEY_DATE = "date";
     public static final String KEY_IS_PRESENT = "is_present";
 
-    public static int START_APP = -1,
-            OVERVIEW = 0;
+    public static final int ACTIVTY_LOGIN = 0;
+    public static final int ACTIVTY_OVERVIEW = 1;
 
     public static String getStringFromArray(ArrayList<String> shifts) {
         StringBuilder sb = new StringBuilder();

@@ -159,22 +159,28 @@ public class CalendarAdapter extends BaseAdapter {
                         && selected.get(Calendar.DAY_OF_MONTH) == cal.get(Calendar.DAY_OF_MONTH))) {
                     // If current date is not selected
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                        convertView.setBackground(ContextCompat.getDrawable(context, R.drawable.calendar_cell_background));
+                        calendarCell.setBackground(ContextCompat.getDrawable(context, R.drawable.calendar_cell_background));
                     } else {
-                        convertView.setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.calendar_cell_background));
+                        calendarCell.setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.calendar_cell_background));
                     }
                 } else {
                     // If current date is selected
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                        convertView.setBackground(ContextCompat.getDrawable(context, R.drawable.calendar_cell_highlighted_background));
+                        calendarCell.setBackground(ContextCompat.getDrawable(context, R.drawable.calendar_cell_highlighted_background));
                     } else {
-                        convertView.setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.calendar_cell_highlighted_background));
+                        calendarCell.setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.calendar_cell_highlighted_background));
                     }
                 }
             }
         } else {
             // If current date is not in current month
             hudContainer.setVisibility(View.INVISIBLE);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                calendarCell.setBackground(ContextCompat.getDrawable(context, R.drawable.calendar_cell_background));
+            } else {
+                calendarCell.setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.calendar_cell_background));
+            }
 
             dateOfMonth.setTextColor(ContextCompat.getColor(context, R.color.LightGrey));
             altDateOfMonth.setTextColor(ContextCompat.getColor(context, R.color.LightGrey));

@@ -15,8 +15,8 @@
             style="@android:style/Widget.DeviceDefault.Button.Borderless"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:src="@android:drawable/ic_media_previous"
-            android:padding="0dp" />
+            android:padding="0dp"
+            android:src="@android:drawable/ic_media_previous" />
 
         <TextView
             android:id="@+id/calendar_month"
@@ -33,72 +33,76 @@
             style="@android:style/Widget.DeviceDefault.Button.Borderless"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:src="@android:drawable/ic_media_next"
-            android:padding="0dp" />
+            android:padding="0dp"
+            android:src="@android:drawable/ic_media_next" />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingLeft="20dp"
-        android:paddingRight="20dp">
+        android:paddingLeft="25dp"
+        android:paddingRight="25dp"
+        android:orientation="vertical">
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:layout_weight="1"
-            android:text="SUN" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:layout_weight="1"
-            android:text="MON" />
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="SUN" />
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:layout_weight="1"
-            android:text="TUE" />
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="MON" />
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:layout_weight="1"
-            android:text="WED" />
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="TUE" />
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:layout_weight="1"
-            android:text="THU" />
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="WED" />
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:layout_weight="1"
-            android:text="FRI" />
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="THU" />
 
-        <TextView
-            android:layout_width="0dp"
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="FRI" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="SAT" />
+        </LinearLayout>
+
+        <com.passion.attendance.StaticGridView
+            android:id="@+id/calendar_gridview"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:layout_weight="1"
-            android:text="SAT" />
+            android:listSelector="@color/Transparent"
+            android:numColumns="7"/>
     </LinearLayout>
-
-    <com.passion.attendance.StaticGridView
-        android:id="@+id/calendar_gridview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:listSelector="@color/Transparent"
-        android:paddingLeft="20dp"
-        android:paddingRight="20dp"
-        android:numColumns="7" />
 </LinearLayout>

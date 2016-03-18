@@ -3,6 +3,7 @@ package com.passion.attendance;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -339,12 +340,20 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
 
         @Override
+        protected void onPreExecute() {
+            View focusView = getCurrentFocus();
+            if (focusView != null) focusView.clearFocus();
+        }
+
+        @Override
         protected void onPostExecute(final Boolean success) {
             mAuthTask = null;
             showProgress(false);
 
+
             if (success) {
-                finish();
+                startActivityForResult(new Intent(LoginActivity.this, OverviewActivity.class), PassionAttendance.ACTIVTY_OVERVIEW);
+//                finish();
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();
@@ -355,6 +364,19 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         protected void onCancelled() {
             mAuthTask = null;
             showProgress(false);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode) {
+            case PassionAttendance.ACTIVTY_OVERVIEW:
+                finish();
+                break;
+            default:
+                break;
         }
     }
 }

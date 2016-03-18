@@ -16,7 +16,6 @@ public class LandingActivty extends AppCompatActivity implements View.OnClickLis
 
         Button GetStartedButton = (Button) findViewById(R.id.get_started_button);
 
-        startActivityForResult(new Intent(this, OverviewActivity.class), PassionAttendance.OVERVIEW);
         GetStartedButton.setOnClickListener(this);
     }
 
@@ -34,7 +33,7 @@ public class LandingActivty extends AppCompatActivity implements View.OnClickLis
 
         switch (id){
             case R.id.get_started_button:
-                startActivityForResult(new Intent(this, OverviewActivity.class), PassionAttendance.OVERVIEW);
+                startActivityForResult(new Intent(this, LoginActivity.class), PassionAttendance.ACTIVTY_LOGIN);
                 break;
         }
     }
