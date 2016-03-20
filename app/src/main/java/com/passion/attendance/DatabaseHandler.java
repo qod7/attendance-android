@@ -167,7 +167,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     }
 
-    public void insertStaff(Staff staff){
+    public void insertStaff(Staff staff) {
         SharedPreferences sp = context.getSharedPreferences(PassionAttendance.PREFERENCE_STAFF,
                 Context.MODE_PRIVATE);
 
@@ -182,7 +182,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 .apply();
     }
 
-    public Staff retrieveStaff(){
+    public Staff retrieveStaff() {
         SharedPreferences sp;
         try {
             sp = context.getSharedPreferences(PassionAttendance.PREFERENCE_STAFF,
@@ -379,5 +379,93 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
         c.close();
         return messages;
+    }
+
+    public Integer getMessagesCount() {
+        SQLiteDatabase db = getReadableDatabase();
+        String Query;
+        Query = String.format(
+                "SELECT COUNT(*) AS %s FROM messages;",
+                PassionAttendance.KEY_COUNT
+        );
+
+        Cursor c = db.rawQuery(Query, null);
+
+        try {
+            c.moveToFirst();
+            Integer count = c.getInt(c.getColumnIndex(PassionAttendance.KEY_COUNT));
+            c.close();
+            return count;
+        } catch (Exception e) {
+            c.close();
+            return 0;
+        }
+    }
+
+    public Integer getMessagesCount(LocalDate d) {
+        SQLiteDatabase db = getReadableDatabase();
+        String Query;
+        Query = String.format(
+                "SELECT COUNT(*) AS %s FROM messages WHERE %s = \"%d\";",
+                PassionAttendance.KEY_COUNT,
+                PassionAttendance.KEY_DATE,
+                d.toDate().getTime()
+        );
+
+        Cursor c = db.rawQuery(Query, null);
+
+        try {
+            c.moveToFirst();
+            Integer count = c.getInt(c.getColumnIndex(PassionAttendance.KEY_COUNT));
+            c.close();
+            return count;
+        } catch (Exception e) {
+            c.close();
+            return 0;
+        }
+    }
+
+    public Integer getEventsCount() {
+        SQLiteDatabase db = getReadableDatabase();
+        String Query;
+        Query = String.format(
+                "SELECT COUNT(*) AS %s FROM events;",
+                PassionAttendance.KEY_COUNT
+        );
+
+        Cursor c = db.rawQuery(Query, null);
+
+        try {
+            c.moveToFirst();
+            Integer count = c.getInt(c.getColumnIndex(PassionAttendance.KEY_COUNT));
+            c.close();
+            return count;
+        } catch (Exception e) {
+            c.close();
+            return 0;
+        }
+    }
+
+    public Integer getEventsCount(LocalDate d) {
+        SQLiteDatabase db = getReadableDatabase();
+        String Query;
+        Query = String.format(
+                "SELECT COUNT(*) AS %s FROM events WHERE %s = \"%d\";",
+                PassionAttendance.KEY_COUNT,
+                PassionAttendance.KEY_DATE,
+                d.toDate().getTime()
+        );
+
+        Cursor c = db.rawQuery(Query, null);
+
+        try {
+            c.moveToFirst();
+            Integer count = c.getInt(c.getColumnIndex(PassionAttendance.KEY_COUNT));
+            c.close();
+            return count;
+        } catch (Exception e) {
+            c.close();
+            return 0;
+        }
     }
 }

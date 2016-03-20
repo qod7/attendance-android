@@ -43,16 +43,16 @@ public class PassionAttendance extends Application {
     public static final String KEY_SENT = "sent";
     public static final String KEY_DATE = "date";
     public static final String KEY_IS_PRESENT = "is_present";
-
-    public static final int ACTIVTY_LOGIN = 0;
-    public static final int ACTIVTY_OVERVIEW = 1;
-
     public static final String KEY_PASSWORD = "password";
     public static final String KEY_USER = "user";
     public static final String KEY_TOKEN = "token";
     public static final String KEY_YEAR = "year";
     public static final String KEY_MONTH = "month";
     public static final String KEY_DAY = "day";
+    public static final String KEY_COUNT = "count";
+
+    public static final int ACTIVTY_LOGIN = 0;
+    public static final int ACTIVTY_OVERVIEW = 1;
 
     public static final String HOST = "www.eattendance.com";
 
