@@ -11,10 +11,6 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import org.inf.nepalicalendar.NepaliCalendar;
-import org.inf.nepalicalendar.NepaliDate;
-import org.inf.nepalicalendar.NepaliDateException;
-import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 
 /**
@@ -31,6 +27,10 @@ public class OverviewFragment extends Fragment {
     private ImageButton mSwitchViewButton;
     private StaticListView mShiftListView;
     private TextView mTodayOverview;
+
+    private EventFragment mEventView;
+    private AttendanceFragment mAttendanceView;
+    private InboxFragment mMessageView;
 
     public OverviewFragment() {
         mContext = getContext();
@@ -67,15 +67,21 @@ public class OverviewFragment extends Fragment {
         mShiftListView = (StaticListView) rootView.findViewById(R.id.shift_day_timetables);
         mTodayOverview = (TextView) rootView.findViewById(R.id.today_overview);
 
+        mEventView = EventFragment.newInstance();
+        mAttendanceView = AttendanceFragment.newInstance();
+        mMessageView = InboxFragment.newInstance();
+
         mTabHost = (FragmentTabHost) rootView.findViewById(android.R.id.tabhost);
         mTabHost.setup(mContext, getFragmentManager(), R.id.realtabcontent);
 
+        LocalDate today = LocalDate.now();
+
         mTabHost.addTab(mTabHost.newTabSpec("tab1").setIndicator("Events"),
-                EventsFragment.class, null);
+                mEventView.getClass(), null);
         mTabHost.addTab(mTabHost.newTabSpec("tab2").setIndicator("Messages"),
-                InboxFragment.class, null);
+                mAttendanceView.getClass(), null);
         mTabHost.addTab(mTabHost.newTabSpec("tab3").setIndicator("Attendance"),
-                AttendanceFragment.class, null);
+                mMessageView.getClass(), null);
 
         setTodayVisible(true);
 
@@ -87,26 +93,6 @@ public class OverviewFragment extends Fragment {
         });
 
         return rootView;
-    }
-
-    private void setDisplayedDate(LocalDate localDate) {
-        String dateString = "";
-        try {
-            LocalDate now = DateTime.now().toLocalDate();
-            NepaliDate nowNepali = NepaliCalendar.convertGregorianToNepaliDate(now.toDate());
-
-            dateString = String.format(
-                    "%s, %s %d, %d",
-                    now.toString("EE"),
-                    nowNepali.getMonthName(),
-                    nowNepali.getDay(),
-                    nowNepali.getYear()
-            );
-
-        } catch (NepaliDateException e) {
-            e.printStackTrace();
-        }
-        mDateTextView.setText(dateString);
     }
 
     private void setTodayVisible(boolean visibility) {
@@ -126,7 +112,7 @@ public class OverviewFragment extends Fragment {
         }
     }
 
-    private void populateSelected() {
+    public void populateSelected() {
 
         Bundle args = getArguments();
 
@@ -137,7 +123,13 @@ public class OverviewFragment extends Fragment {
                 args.getInt(PassionAttendance.KEY_DAY)
         );
 
-        setDisplayedDate(selectedDate);
+        mDateTextView.setText(
+                PassionAttendance.getDisplayedDate(selectedDate)
+        );
+
+        mMessageView.loadView(selectedDate);
+        mEventView.loadView(selectedDate);
+        mAttendanceView.loadView(selectedDate);
     }
 
     private void populateToday() {
@@ -147,7 +139,9 @@ public class OverviewFragment extends Fragment {
         // Displaying today's date
         LocalDate selectedDate = LocalDate.now();
 
-        setDisplayedDate(selectedDate);
+        mDateTextView.setText(
+                PassionAttendance.getDisplayedDate(selectedDate)
+        );
 
         Integer msgCount = db.getMessagesCount(selectedDate),
                 eventCount = db.getEventsCount(selectedDate);

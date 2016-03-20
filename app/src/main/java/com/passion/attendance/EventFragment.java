@@ -9,7 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.passion.attendance.Models.Message;
+import com.passion.attendance.Models.Event;
 
 import org.joda.time.LocalDate;
 
@@ -18,29 +18,29 @@ import java.util.ArrayList;
 /**
  * Created by Aayush on 3/20/2016.
  */
-public class InboxFragment extends Fragment {
+public class EventFragment extends Fragment {
 
     private final Context mContext;
-    private StaticListView mMessageListView;
+    private StaticListView mEventListView;
     private DatabaseHandler mDatabaseHandler;
-    private MessageListAdapter mMessageListAdapter;
-    private ArrayList<Message> mMessageList;
+    private EventListAdapter mEventListAdapter;
+    private ArrayList<Event> mEventList;
     private TextView mFragmentTitle;
 
-    public InboxFragment() {
+    public EventFragment() {
         mContext = getContext();
     }
 
-    public static InboxFragment newInstance() {
+    public static EventFragment newInstance() {
         Bundle args = new Bundle();
 
-        InboxFragment fragment = new InboxFragment();
+        EventFragment fragment = new EventFragment();
         fragment.setArguments(args);
         return fragment;
     }
 
-    public static InboxFragment newInstance(Bundle args) {
-        InboxFragment fragment = new InboxFragment();
+    public static EventFragment newInstance(Bundle args) {
+        EventFragment fragment = new EventFragment();
         fragment.setArguments(args);
         return fragment;
     }
@@ -50,15 +50,15 @@ public class InboxFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
 
-        mMessageList = new ArrayList<>();
+        mEventList = new ArrayList<>();
         mDatabaseHandler = new DatabaseHandler(mContext);
         mFragmentTitle = (TextView) rootView.findViewById(R.id.detail_title);
-        mMessageListView = (StaticListView) rootView.findViewById(R.id.detail_list);
-        mMessageListAdapter = new MessageListAdapter(mContext, mMessageList);
+        mEventListView = (StaticListView) rootView.findViewById(R.id.detail_list);
+        mEventListAdapter = new EventListAdapter(mContext, mEventList);
 
-        mMessageListView.setAdapter(mMessageListAdapter);
+        mEventListView.setAdapter(mEventListAdapter);
 
-        if (getArguments() == null){
+        if (getArguments() == null) {
             loadView(LocalDate.now());
         } else {
             LocalDate localDate = new LocalDate(
@@ -75,7 +75,7 @@ public class InboxFragment extends Fragment {
     public void loadView(LocalDate selectedDate) {
         mFragmentTitle.setText("Events");
 
-        mMessageList = mDatabaseHandler.retrieveMessages(selectedDate);
-        mMessageListAdapter.notifyDataSetChanged();
+        mEventList = mDatabaseHandler.retrieveEvents(selectedDate);
+        mEventListAdapter.notifyDataSetChanged();
     }
 }

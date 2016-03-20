@@ -7,6 +7,10 @@ import android.net.NetworkInfo;
 
 import net.danlew.android.joda.JodaTimeAndroid;
 
+import org.inf.nepalicalendar.NepaliCalendar;
+import org.inf.nepalicalendar.NepaliDate;
+import org.inf.nepalicalendar.NepaliDateException;
+import org.joda.time.LocalDate;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -103,6 +107,26 @@ public class PassionAttendance extends Application {
         NetworkInfo.State network = info.getState();
         return (network == NetworkInfo.State.CONNECTED || network == NetworkInfo.State.CONNECTING);
     }
+
+    public static String getDisplayedDate(LocalDate localDate) {
+        String dateString = "";
+        try {
+            NepaliDate nowNepali = NepaliCalendar.convertGregorianToNepaliDate(localDate.toDate());
+
+            dateString = String.format(
+                    "%s, %s %d, %d",
+                    localDate.toString("EE"),
+                    nowNepali.getMonthName(),
+                    nowNepali.getDay(),
+                    nowNepali.getYear()
+            );
+
+        } catch (NepaliDateException e) {
+            e.printStackTrace();
+        }
+        return dateString;
+    }
+
 
     @Override
     public void onCreate() {
