@@ -48,7 +48,6 @@ public class OverviewActivity extends AppCompatActivity {
         mOverViewView = (ViewGroup) findViewById(R.id.overview_container);
         mOverViewScrollView = (NestedScrollView) findViewById(R.id.overview_scrollview);
 
-        mCalendarView = CalendarFragment.newInstance();
         mCalendarContainer = findViewById(R.id.calendar_container);
 
         InitializeCalendar();
@@ -131,6 +130,8 @@ public class OverviewActivity extends AppCompatActivity {
     }
 
     private void InitializeCalendar() {
+        mCalendarView = CalendarFragment.newInstance();
+
         FragmentTransaction t = getSupportFragmentManager().beginTransaction();
         t.replace(R.id.calendar_container, mCalendarView);
         t.commit();

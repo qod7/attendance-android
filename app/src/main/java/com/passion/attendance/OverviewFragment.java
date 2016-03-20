@@ -145,12 +145,45 @@ public class OverviewFragment extends Fragment {
         DatabaseHandler db = new DatabaseHandler(mContext);
 
         // Displaying today's date
-        setDisplayedDate(DateTime.now().toLocalDate());
+        LocalDate selectedDate = LocalDate.now();
 
+        setDisplayedDate(selectedDate);
+
+        Integer msgCount = db.getMessagesCount(selectedDate),
+                eventCount = db.getEventsCount(selectedDate);
+
+        setOverviewMessage(msgCount, eventCount);
+    }
+
+    private void setOverviewMessage(Integer msgCount, Integer eventCount) {
         StringBuilder sb = new StringBuilder();
+        String message = "";
 
+        if (msgCount != 0) {
+            message = "You have ";
 
+            sb.append(msgCount)
+                    .append(" message")
+                    .append(msgCount > 1 ? "s" : "");
 
+            message = message.concat(sb.toString());
+        }
+        sb = new StringBuilder();
+
+        if (eventCount != 0) {
+            if (message.isEmpty())
+                message = "You have ";
+            else
+                message = " and ";
+
+            sb.append(eventCount)
+                    .append(" event")
+                    .append(eventCount > 1 ? "s" : "");
+
+            message = message.concat(sb.toString());
+        }
+
+        mTodayOverview.setText(message);
     }
 
 }
