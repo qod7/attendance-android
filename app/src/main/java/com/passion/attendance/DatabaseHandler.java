@@ -291,7 +291,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public ArrayList<Event> retrieveEvents(LocalDate d) {
         SQLiteDatabase db = getReadableDatabase();
         String Query = String.format(
-                "SELECT * FROM events WHERE %s ;"
+                "SELECT * FROM events WHERE %s >= %d AND %s <= %d;",
+                PassionAttendance.KEY_FROM,
+                d.toDate().getTime(),
+                PassionAttendance.KEY_TO,
+                d.toDate().getTime()
         );
         Cursor c = db.rawQuery(Query, null);
 
