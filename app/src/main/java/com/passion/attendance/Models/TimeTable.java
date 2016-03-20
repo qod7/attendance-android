@@ -1,32 +1,32 @@
 package com.passion.attendance.Models;
 
-import java.util.Date;
+import org.joda.time.LocalTime;
 
 /**
  * Created by Aayush on 3/14/2016.
  */
 public class TimeTable {
-    Date from;
-    Date to;
+    LocalTime from;
+    LocalTime to;
 
-    public TimeTable(Date from, Date to) {
+    public TimeTable(LocalTime from, LocalTime to) {
         this.from = from;
         this.to = to;
     }
 
-    public Date getFrom() {
+    public LocalTime getFrom() {
         return from;
     }
 
-    public void setFrom(Date from) {
+    public void setFrom(LocalTime from) {
         this.from = from;
     }
 
-    public Date getTo() {
+    public LocalTime getTo() {
         return to;
     }
 
-    public void setTo(Date to) {
+    public void setTo(LocalTime to) {
         this.to = to;
     }
 }

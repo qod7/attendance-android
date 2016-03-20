@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="10dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/selected_date"
+            style="@android:style/TextAppearance.DialogWindowTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Sunday, Bhadra 24, 2072"
+            android:textStyle="bold" />
+
+        <ImageButton
+            android:id="@+id/switch_mode_button"
+            style="@style/QuickActionButtons"
+            android:layout_width="wrap_content"
+            android:layout_height="25dp"
+            android:src="@android:drawable/ic_menu_my_calendar" />
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/detail_today"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <com.passion.attendance.StaticListView
+            android:id="@+id/shift_day_timetables"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp" />
+
+        <TextView
+            android:id="@+id/today_overview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="You have 1 message and 2 events for today." />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/detail_selected_date"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <android.support.v4.app.FragmentTabHost xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@android:id/tabhost"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <TabWidget
+                    android:id="@android:id/tabs"
+
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:orientation="horizontal" />
+
+                <FrameLayout
+                    android:id="@android:id/tabcontent"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="0" />
+
+                <FrameLayout
+                    android:id="@+id/realtabcontent"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+            </LinearLayout>
+        </android.support.v4.app.FragmentTabHost>
+
+    </LinearLayout>
+
+</LinearLayout>

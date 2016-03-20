@@ -2,13 +2,15 @@ package com.passion.attendance;
 
 import android.view.View;
 
+import org.joda.time.LocalDate;
+
 import java.util.Date;
 
 /**
  * Created by Aayush on 1/10/2016.
  */
 public abstract class CalendarListener {
-    public abstract void onSelectDate(Date date, View view);
+    public abstract void onSelectDate(LocalDate date, View view);
 
 
     /**
@@ -31,8 +33,6 @@ public abstract class CalendarListener {
     public void onChangeMonth(int month, int year) {
         // Do nothing
     }
-
-    ;
 
 
     /**

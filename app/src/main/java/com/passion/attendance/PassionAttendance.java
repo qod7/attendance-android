@@ -1,8 +1,11 @@
 package com.passion.attendance;
 
+import android.app.Application;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+
+import net.danlew.android.joda.JodaTimeAndroid;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,7 +18,7 @@ import java.util.Iterator;
 /**
  * Created by Aayush on 12/9/2015.
  */
-public class PassionAttendance {
+public class PassionAttendance extends Application {
     public static final String PACKAGE_NAME = "com.passion.attendance";
     public static final String PREFERENCE_STAFF = "staff";
 
@@ -96,6 +99,13 @@ public class PassionAttendance {
         if (info == null) return false;
         NetworkInfo.State network = info.getState();
         return (network == NetworkInfo.State.CONNECTED || network == NetworkInfo.State.CONNECTING);
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        JodaTimeAndroid.init(this);
     }
 
 }

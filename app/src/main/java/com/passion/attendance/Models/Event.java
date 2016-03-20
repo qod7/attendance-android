@@ -1,6 +1,6 @@
 package com.passion.attendance.Models;
 
-import java.util.Date;
+import org.joda.time.LocalDate;
 
 /**
  * Created by Aayush on 1/2/2016.
@@ -10,10 +10,10 @@ public class Event {
     Integer id;
     String title;
     String description;
-    Date from;
-    Date to;
+    LocalDate from;
+    LocalDate to;
 
-    public Event(Integer id, String title, String description, Date from) {
+    public Event(Integer id, String title, String description, LocalDate from) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -21,7 +21,7 @@ public class Event {
         this.to = from;
     }
 
-    public Event(Integer id, String title, String description, Date from, Date to) {
+    public Event(Integer id, String title, String description, LocalDate from, LocalDate to) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -41,11 +41,11 @@ public class Event {
         return description;
     }
 
-    public Date getFrom() {
+    public LocalDate getFrom() {
         return from;
     }
 
-    public Date getTo() {
+    public LocalDate getTo() {
         return to;
     }
 }

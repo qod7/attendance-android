@@ -13,10 +13,10 @@ import android.widget.TextView;
 import org.inf.nepalicalendar.NepaliCalendar;
 import org.inf.nepalicalendar.NepaliDate;
 import org.inf.nepalicalendar.NepaliDateException;
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
@@ -24,25 +24,25 @@ import java.util.Random;
  * Created by Aayush on 11/27/2015.
  */
 public class CalendarAdapter extends BaseAdapter {
-    private Calendar GregorianCalendar;
+    private LocalDate GregorianDate;
 
     private NepaliDate SelectedNepaliDate = null;
 
-    private List<Date> DateList;
+    private List<LocalDate> DateList;
 
     private Context context;
 
-    private Date mSelected;
+    private LocalDate mSelected;
 
-    public CalendarAdapter(Context context, Date SelectedDate) {
+    public CalendarAdapter(Context context, LocalDate SelectedDate) {
         this.context = context;
 
         this.DateList = new ArrayList<>();
 
-        GregorianCalendar = Calendar.getInstance();
+        GregorianDate = DateTime.now().toLocalDate();
 
         try {
-            SelectedNepaliDate = NepaliCalendar.convertGregorianToNepaliDate(SelectedDate);
+            SelectedNepaliDate = NepaliCalendar.convertGregorianToNepaliDate(SelectedDate.toDate());
         } catch (NepaliDateException e) {
         }
 
@@ -52,7 +52,7 @@ public class CalendarAdapter extends BaseAdapter {
     }
 
     public CalendarAdapter(Context context) {
-        this(context, Calendar.getInstance().getTime());
+        this(context, DateTime.now().toLocalDate());
     }
 
     @Override
@@ -61,7 +61,7 @@ public class CalendarAdapter extends BaseAdapter {
     }
 
     @Override
-    public Date getItem(int position) {
+    public LocalDate getItem(int position) {
         return DateList.get(position);
     }
 
@@ -111,7 +111,7 @@ public class CalendarAdapter extends BaseAdapter {
         boolean currentMonth = false;
 
         try {
-            NepaliDate currentDate = NepaliCalendar.convertGregorianToNepaliDate(DateList.get(position));
+            NepaliDate currentDate = NepaliCalendar.convertGregorianToNepaliDate(DateList.get(position).toDate());
 
             dayOfMonth = currentDate.getDay();
             int month = currentDate.getMonthNumber();
@@ -121,10 +121,9 @@ public class CalendarAdapter extends BaseAdapter {
             e.printStackTrace();
         }
 
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(DateList.get(position));
+        DateTime cal = DateTime.now().withDate(DateList.get(position));
 
-        altDayOfMonth = cal.get(Calendar.DAY_OF_MONTH);
+        altDayOfMonth = cal.getDayOfMonth();
 
         dateOfMonth.setText(String.valueOf(dayOfMonth));
         altDateOfMonth.setText(String.valueOf(altDayOfMonth));
@@ -144,10 +143,8 @@ public class CalendarAdapter extends BaseAdapter {
             altDateOfMonth.setTextColor(ContextCompat.getColor(context, R.color.LightGrey));
         }
         // Checking if displayed date is today
-        Calendar today = Calendar.getInstance();
-        if (today.get(Calendar.YEAR) == cal.get(Calendar.YEAR)
-                && today.get(Calendar.MONTH) == cal.get(Calendar.MONTH)
-                && today.get(Calendar.DAY_OF_MONTH) == cal.get(Calendar.DAY_OF_MONTH)) {
+        LocalDate today = DateTime.now().toLocalDate();
+        if (today.equals(cal.toLocalDate())) {
             // If current date is today
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                 calendarCell.setBackground(ContextCompat.getDrawable(context, R.drawable.calendar_cell_today_background));
@@ -156,67 +153,60 @@ public class CalendarAdapter extends BaseAdapter {
             }
         } else {
             // If current date is not today
-            Calendar selected = Calendar.getInstance();
-            selected.setTime(mSelected);
             // Checking if current date is selected
-            if (!(selected.get(Calendar.YEAR) == cal.get(Calendar.YEAR)
-                    && selected.get(Calendar.MONTH) == cal.get(Calendar.MONTH)
-                    && selected.get(Calendar.DAY_OF_MONTH) == cal.get(Calendar.DAY_OF_MONTH))) {
-                // If current date is not selected
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                    calendarCell.setBackground(ContextCompat.getDrawable(context, R.drawable.calendar_cell_background));
-                } else {
-                    calendarCell.setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.calendar_cell_background));
-                }
-            } else {
+            if (mSelected.equals(cal.toLocalDate())) {
                 // If current date is selected
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                     calendarCell.setBackground(ContextCompat.getDrawable(context, R.drawable.calendar_cell_highlighted_background));
                 } else {
                     calendarCell.setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.calendar_cell_highlighted_background));
                 }
+            } else {
+                // If current date is not selected
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    calendarCell.setBackground(ContextCompat.getDrawable(context, R.drawable.calendar_cell_background));
+                } else {
+                    calendarCell.setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.calendar_cell_background));
+                }
             }
         }
         return convertView;
     }
 
-    public void setCalendar(Date currentDate) {
-        Calendar tempGregorianCalendar = GregorianCalendar;
-        tempGregorianCalendar.setTime(currentDate);
-
-
+    public void setCalendar(LocalDate currentDate) {
+        LocalDate tempGregorianDate = currentDate;
         NepaliDate tempNepaliDate;
 
         DateList.clear();
 
         try {
-            tempNepaliDate = NepaliCalendar.convertGregorianToNepaliDate(tempGregorianCalendar.getTime());
+            tempNepaliDate = NepaliCalendar.convertGregorianToNepaliDate(currentDate.toDate());
             SelectedNepaliDate = tempNepaliDate;
 
             tempNepaliDate = new NepaliDate(tempNepaliDate.getYear(), tempNepaliDate.getMonthNumber(), 1);
 
-            tempGregorianCalendar.setTime(NepaliCalendar.convertNepaliToGregorianDate(tempNepaliDate));
+            tempGregorianDate = new LocalDate(NepaliCalendar.convertNepaliToGregorianDate(tempNepaliDate));
 
             int currentMonth = tempNepaliDate.getMonthNumber(),
                     currentYear = tempNepaliDate.getYear();
 
-            tempGregorianCalendar.add(Calendar.DATE, -GregorianCalendar.get(Calendar.DAY_OF_WEEK) + 1);
-            tempNepaliDate = NepaliCalendar.convertGregorianToNepaliDate(tempGregorianCalendar);
+            tempGregorianDate = tempGregorianDate.minusDays(tempGregorianDate.getDayOfWeek());
+            tempNepaliDate = NepaliCalendar.convertGregorianToNepaliDate(tempGregorianDate.toDate());
 
             while ((currentYear == tempNepaliDate.getYear() && currentMonth >= tempNepaliDate.getMonthNumber()) ||
                     (currentYear > tempNepaliDate.getYear() && currentMonth == 1)) {
-                DateList.add(tempGregorianCalendar.getTime());
+                DateList.add(tempGregorianDate);
 
-                tempGregorianCalendar.add(Calendar.DATE, 1);
-                tempNepaliDate = NepaliCalendar.convertGregorianToNepaliDate(tempGregorianCalendar);
+                tempGregorianDate = tempGregorianDate.plusDays(1);
+                tempNepaliDate = NepaliCalendar.convertGregorianToNepaliDate(tempGregorianDate.toDate());
 
             }
 
-            if (tempGregorianCalendar.get(Calendar.DAY_OF_WEEK) != 1)
-                for (int i = tempGregorianCalendar.get(Calendar.DAY_OF_WEEK); i <= 7; i++) {
-                    DateList.add(tempGregorianCalendar.getTime());
+            if (tempGregorianDate.getDayOfWeek() != 0)
+                for (int i = tempGregorianDate.getDayOfWeek(); i <= 6; i++) {
+                    DateList.add(tempGregorianDate);
 
-                    tempGregorianCalendar.add(Calendar.DATE, 1);
+                    tempGregorianDate = tempGregorianDate.plusDays(1);
                 }
 
         } catch (NepaliDateException e) {
@@ -225,14 +215,14 @@ public class CalendarAdapter extends BaseAdapter {
     }
 
     public void setCalendar(NepaliDate currentDate) {
-        setCalendar(NepaliCalendar.convertNepaliToGregorianDate(currentDate));
+        setCalendar(new LocalDate(NepaliCalendar.convertNepaliToGregorianDate(currentDate)));
     }
 
     public NepaliDate getSelectedNepaliDate() {
         return SelectedNepaliDate;
     }
 
-    public void setSelected(Date selected) {
+    public void setSelected(LocalDate selected) {
         this.mSelected = selected;
     }
 }

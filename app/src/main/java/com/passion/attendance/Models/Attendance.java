@@ -1,6 +1,6 @@
 package com.passion.attendance.Models;
 
-import java.util.Date;
+import org.joda.time.LocalDate;
 
 /**
  * Created by Aayush on 3/8/2016.
@@ -8,16 +8,16 @@ import java.util.Date;
 public class Attendance {
 
     Integer id;
-    Date date;
+    LocalDate date;
     Boolean isPresent;
 
-    public Attendance(Integer id, Date date, Boolean isPresent) {
+    public Attendance(Integer id, LocalDate date, Boolean isPresent) {
         this.id = id;
         this.date = date;
         this.isPresent = isPresent;
     }
 
-    public Attendance(Integer id, Date date) {
+    public Attendance(Integer id, LocalDate date) {
         this.id = id;
         this.date = date;
         this.isPresent = null;
@@ -27,7 +27,7 @@ public class Attendance {
         return id;
     }
 
-    public Date getDate() {
+    public LocalDate getDate() {
         return date;
     }
 

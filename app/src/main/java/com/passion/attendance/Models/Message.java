@@ -1,6 +1,6 @@
 package com.passion.attendance.Models;
 
-import java.util.Date;
+import org.joda.time.LocalDate;
 
 /**
  * Created by Aayush on 3/8/2016.
@@ -13,9 +13,9 @@ public class Message {
     String title;
     String content;
     Integer type;
-    Date sentOn;
+    LocalDate sentOn;
 
-    public Message(Integer id, String title, String content, Date sentOn) {
+    public Message(Integer id, String title, String content, LocalDate sentOn) {
         this.id = id;
         this.title = title;
         this.content = content;
@@ -23,7 +23,7 @@ public class Message {
         this.sentOn = sentOn;
     }
 
-    public Message(Integer id, String title, String content, Integer type, Date sentOn) {
+    public Message(Integer id, String title, String content, Integer type, LocalDate sentOn) {
         this.id = id;
         this.title = title;
         this.content = content;
@@ -47,7 +47,7 @@ public class Message {
         return type;
     }
 
-    public Date getSentOn() {
+    public LocalDate getSentOn() {
         return sentOn;
     }
 }

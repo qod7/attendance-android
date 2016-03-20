@@ -16,6 +16,9 @@ public class LandingActivty extends AppCompatActivity implements View.OnClickLis
 
         Button GetStartedButton = (Button) findViewById(R.id.get_started_button);
 
+        if (BuildConfig.DEBUG) {
+            startActivtyWithDummyCredentials();
+        }
         GetStartedButton.setOnClickListener(this);
     }
 
@@ -36,5 +39,15 @@ public class LandingActivty extends AppCompatActivity implements View.OnClickLis
                 startActivityForResult(new Intent(this, LoginActivity.class), PassionAttendance.ACTIVTY_LOGIN);
                 break;
         }
+    }
+
+    private void startActivtyWithDummyCredentials() {
+        Intent intent = new Intent(LandingActivty.this, OverviewActivity.class);
+
+        intent.putExtra(PassionAttendance.KEY_USER, PassionAttendance.DUMMY_EMAIL);
+        intent.putExtra(PassionAttendance.KEY_PASSWORD, PassionAttendance.DUMMY_PASSWORD);
+        intent.putExtra(PassionAttendance.KEY_TOKEN, PassionAttendance.DUMMY_PASSWORD);
+
+        startActivityForResult(intent, PassionAttendance.ACTIVTY_OVERVIEW);
     }
 }

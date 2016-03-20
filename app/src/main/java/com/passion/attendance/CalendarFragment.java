@@ -13,8 +13,9 @@ import android.widget.TextView;
 import org.inf.nepalicalendar.NepaliCalendar;
 import org.inf.nepalicalendar.NepaliDate;
 import org.inf.nepalicalendar.NepaliDateException;
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 
-import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -36,7 +37,7 @@ public class CalendarFragment extends Fragment {
     private ImageButton mPreviousMonthButton;
     private TextView mCalendarMonthName;
 
-    private Date mSelected;
+    private LocalDate mSelected;
 
     public CalendarFragment() {
     }
@@ -48,6 +49,12 @@ public class CalendarFragment extends Fragment {
         return new CalendarFragment();
     }
 
+    public static CalendarFragment newInstance(Bundle args) {
+        CalendarFragment fragment = new CalendarFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -55,7 +62,7 @@ public class CalendarFragment extends Fragment {
         final View rootView = inflater.inflate(R.layout.fragment_calendar, container,
                 false);
 
-        Calendar cal = loadArguments();
+        DateTime cal = loadArguments();
 
         mCalendarGridView = (StaticGridView) rootView.findViewById(R.id.calendar_gridview);
         mNextMonthButton = (ImageButton) rootView.findViewById(R.id.calendar_right_arrow);
@@ -117,14 +124,14 @@ public class CalendarFragment extends Fragment {
         return rootView;
     }
 
-    private Calendar loadArguments() {
+    private DateTime loadArguments() {
         Bundle CalendarData = getArguments();
 
         if (CalendarData == null) CalendarData = new Bundle();
 
         try {
-            Calendar cal = Calendar.getInstance();
-            NepaliDate currentNepaliDate = NepaliCalendar.convertGregorianToNepaliDate(cal);
+            DateTime cal = DateTime.now();
+            NepaliDate currentNepaliDate = NepaliCalendar.convertGregorianToNepaliDate(cal.toDate());
 
             boolean nepaliDate = CalendarData.getBoolean(START_WITH_NEPALI_DATE, false);
 
@@ -135,19 +142,19 @@ public class CalendarFragment extends Fragment {
                 year = CalendarData.getInt(START_MONTH, currentNepaliDate.getYear());
 
                 Date currentDate = NepaliCalendar.convertNepaliToGregorianDate(currentNepaliDate);
-                cal.setTime(currentDate);
+                cal.withDate(new LocalDate(currentDate));
             } else {
-                month = CalendarData.getInt(START_MONTH, cal.get(Calendar.MONTH));
-                day = CalendarData.getInt(START_DAY, cal.get(Calendar.DAY_OF_MONTH));
-                year = CalendarData.getInt(START_MONTH, cal.get(Calendar.YEAR));
+                month = CalendarData.getInt(START_MONTH, cal.getMonthOfYear());
+                day = CalendarData.getInt(START_DAY, cal.getDayOfMonth());
+                year = CalendarData.getInt(START_MONTH, cal.getYear());
 
-                cal.set(year, month, day);
+                cal.withDate(year, month, day);
             }
 
-            mSelected = cal.getTime();
-
+            mSelected = cal.toLocalDate();
             return cal;
         } catch (NepaliDateException e){
+            e.printStackTrace();
             return null;
         }
     }
