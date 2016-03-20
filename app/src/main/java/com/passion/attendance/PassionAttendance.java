@@ -50,6 +50,9 @@ public class PassionAttendance extends Application {
     public static final String KEY_PASSWORD = "password";
     public static final String KEY_USER = "user";
     public static final String KEY_TOKEN = "token";
+    public static final String KEY_YEAR = "year";
+    public static final String KEY_MONTH = "month";
+    public static final String KEY_DAY = "day";
 
     public static final String HOST = "www.eattendance.com";
 

@@ -17,7 +17,6 @@ import com.passion.attendance.Models.Staff;
 import org.joda.time.LocalDate;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 
 /**
@@ -232,11 +231,13 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return attendances;
     }
 
-    public ArrayList<Attendance> retrieveAttendances(Date d) {
+    public ArrayList<Attendance> retrieveAttendances(LocalDate d) {
         SQLiteDatabase db = getReadableDatabase();
 
-        String Query;
-        Query = "SELECT * FROM attendances WHERE " + PassionAttendance.KEY_DATE + " = \"" + d.getTime() + "\";";
+        String Query = String.format("SELECT * FROM attendances WHERE %s = \"%d\";",
+                PassionAttendance.KEY_DATE,
+                d.toDate().getTime()
+        );
         Cursor c = db.rawQuery(Query, null);
 
         ArrayList<Attendance> attendances = new ArrayList<>();
@@ -263,6 +264,35 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = getReadableDatabase();
         String Query;
         Query = "SELECT * FROM events;";
+        Cursor c = db.rawQuery(Query, null);
+
+        ArrayList<Event> events = new ArrayList<>();
+
+        try {
+            c.moveToFirst();
+            while (!c.isAfterLast()) {
+                Integer id = c.getInt(c.getColumnIndex(PassionAttendance.KEY_ID));
+                String title = c.getString(c.getColumnIndex(PassionAttendance.KEY_TITLE));
+                String description = c.getString(c.getColumnIndex(PassionAttendance.KEY_DESCRIPTION));
+                LocalDate from = new LocalDate(c.getInt(c.getColumnIndex(PassionAttendance.KEY_FROM)));
+                LocalDate to = new LocalDate(c.getInt(c.getColumnIndex(PassionAttendance.KEY_TO)));
+
+                events.add(new Event(id, title, description, from, to));
+
+                c.moveToNext();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        c.close();
+        return events;
+    }
+
+    public ArrayList<Event> retrieveEvents(LocalDate d) {
+        SQLiteDatabase db = getReadableDatabase();
+        String Query = String.format(
+                "SELECT * FROM events WHERE %s ;"
+        );
         Cursor c = db.rawQuery(Query, null);
 
         ArrayList<Event> events = new ArrayList<>();
@@ -315,13 +345,13 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return messages;
     }
 
-    public ArrayList<Message> retrieveMessages(Date d) {
+    public ArrayList<Message> retrieveMessages(LocalDate d) {
         SQLiteDatabase db = getReadableDatabase();
         String Query;
         Query = String.format(
-                "SELECT * FROM messages WHERE %s = \"%s\";",
+                "SELECT * FROM messages WHERE %s = \"%d\";",
                 PassionAttendance.KEY_SENT,
-                d.getTime()
+                d.toDate().getTime()
         );
         Cursor c = db.rawQuery(Query, null);
 

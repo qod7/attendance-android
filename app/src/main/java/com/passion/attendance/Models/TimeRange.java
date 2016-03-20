@@ -5,11 +5,11 @@ import org.joda.time.LocalTime;
 /**
  * Created by Aayush on 3/14/2016.
  */
-public class TimeTable {
+public class TimeRange {
     LocalTime from;
     LocalTime to;
 
-    public TimeTable(LocalTime from, LocalTime to) {
+    public TimeRange(LocalTime from, LocalTime to) {
         this.from = from;
         this.to = to;
     }

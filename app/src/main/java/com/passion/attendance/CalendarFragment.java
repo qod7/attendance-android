@@ -28,6 +28,7 @@ public class CalendarFragment extends Fragment {
             START_MONTH = "month",
             START_YEAR = "year",
             START_WITH_NEPALI_DATE = "start_nepali_date";
+
     private int mCurrentMonth;
     private CalendarListener mCalendarListener;
     private AdapterView.OnItemClickListener mItemClickListener;
