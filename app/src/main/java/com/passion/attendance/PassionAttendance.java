@@ -2,15 +2,20 @@ package com.passion.attendance;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+
+import com.passion.attendance.Models.TimeRange;
 
 import net.danlew.android.joda.JodaTimeAndroid;
 
 import org.inf.nepalicalendar.NepaliCalendar;
 import org.inf.nepalicalendar.NepaliDate;
 import org.inf.nepalicalendar.NepaliDateException;
+import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -35,7 +40,6 @@ public class PassionAttendance extends Application {
     public static final String KEY_ORGANIZATION = "organization";
     public static final String KEY_IMAGE_URL = "image";
     public static final String KEY_CONTACT_NUMBER = "contact";
-    public static final String KEY_SHIFT = "shift";
     public static final String KEY_EXTRAS = "extras";
     public static final String KEY_PREFERENCES = "preferences";
     public static final String KEY_TITLE = "title";
@@ -54,11 +58,18 @@ public class PassionAttendance extends Application {
     public static final String KEY_MONTH = "month";
     public static final String KEY_DAY = "day";
     public static final String KEY_COUNT = "count";
+    public static final String KEY_STATUS = "status";
+    public static final String KEY_STAFF = "status";
+    public static final String KEY_EVENT = "event";
+    public static final String KEY_ATTENDANCE = "attendance";
+    public static final String KEY_MESSAGE = "message";
+    public static final String KEY_SHIFT = "shift";
+    public static final String KEY_OFFSET = "offset";
 
     public static final int ACTIVTY_LOGIN = 0;
     public static final int ACTIVTY_OVERVIEW = 1;
-
     public static final String HOST = "www.eattendance.com";
+    public static int TIME_OFFSET = -1;
 
     public static String getStringFromArray(ArrayList<String> shifts) {
         StringBuilder sb = new StringBuilder();
@@ -78,11 +89,16 @@ public class PassionAttendance extends Application {
         return output;
     }
 
-    public static String getStringFromMap(HashMap<String, String> extras) {
+    public static String getStringFromStringMap(HashMap<String, String> extras) {
         return new JSONObject(extras).toString();
     }
 
-    public static HashMap<String, String> getMapFromString(String extras) {
+    public static String getStringFromTimeRangeMap(HashMap<TimeRange, Boolean> extras) {
+        return new JSONObject(extras).toString();
+    }
+
+
+    public static HashMap<String, String> getStringMapFromString(String extras) {
         try {
             HashMap<String, String> map = new HashMap<>();
             JSONObject json = new JSONObject(extras);
@@ -96,6 +112,25 @@ public class PassionAttendance extends Application {
             }
             return map;
         } catch (JSONException e){
+            return new HashMap<>();
+        }
+    }
+
+    public static HashMap<TimeRange, Boolean> getTimeRangeMapFromString(String extras) {
+        try {
+            HashMap<TimeRange, Boolean> map = new HashMap<>();
+            JSONObject json = new JSONObject(extras);
+
+            Iterator<?> keys = json.keys();
+
+            while (keys.hasNext()) {
+                TimeRange key = (TimeRange) keys.next();
+                Boolean value = json.getBoolean((String) keys.next());
+
+                map.put(key, value);
+            }
+            return map;
+        } catch (JSONException e) {
             return new HashMap<>();
         }
     }
@@ -133,6 +168,20 @@ public class PassionAttendance extends Application {
         super.onCreate();
 
         JodaTimeAndroid.init(this);
+
+        TIME_OFFSET = calculateTimeOffset();
+
     }
 
+    private int calculateTimeOffset() {
+        LocalTime nowUTC = LocalTime.now(DateTimeZone.UTC);
+        LocalTime nowLocal = LocalTime.now();
+
+        int duration = nowUTC.getMillisOfDay() - nowLocal.getMillisOfDay();
+
+        SharedPreferences sp = getSharedPreferences(PACKAGE_NAME, MODE_PRIVATE);
+        sp.edit().putInt(KEY_OFFSET, duration).apply();
+
+        return duration;
+    }
 }

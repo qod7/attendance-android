@@ -13,6 +13,7 @@ import android.widget.Toast;
 import com.passion.attendance.Models.Attendance;
 import com.passion.attendance.Models.Event;
 import com.passion.attendance.Models.Message;
+import com.passion.attendance.Models.Shift;
 import com.passion.attendance.Models.Staff;
 
 import org.inf.nepalicalendar.NepaliCalendar;
@@ -20,6 +21,9 @@ import org.inf.nepalicalendar.NepaliDate;
 import org.inf.nepalicalendar.NepaliDateException;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -190,8 +194,63 @@ public class OverviewActivity extends AppCompatActivity {
             } catch (IOException e) {
                 return false;
             }
-
             return true;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            if (aBoolean) {
+                JSONObject response;
+                Boolean status;
+                try {
+                    response = new JSONObject(mResponse);
+                    status = response.getBoolean(PassionAttendance.KEY_STATUS);
+                } catch (JSONException e) {
+                    Log.e("HTTP", "Server Error");
+                }
+                try {
+                    JSONObject staff = response.getJSONObject(PassionAttendance.KEY_STAFF);
+                    mDatabaseHandler.insertStaff(new Staff(staff.toString()));
+                } catch (JSONException e) {
+                    Log.i("HTTP", "Staff object not found");
+                }
+                try {
+                    JSONArray messages = response.getJSONArray(PassionAttendance.KEY_MESSAGE);
+                    ArrayList<Message> m = new ArrayList<>();
+                    for (int i = 0; i < messages.length(); i++) {
+                        m.add(new Message(messages.getJSONObject(i).toString()));
+                    }
+                    mDatabaseHandler.insertMessage(m);
+                } catch (JSONException e) {
+                    Log.i("HTTP", "Message object not found");
+                }
+                try {
+                    JSONArray events = response.getJSONArray(PassionAttendance.KEY_EVENT);
+                    ArrayList<Event> e = new ArrayList<>();
+                    for (int i = 0; i < events.length(); i++) {
+                        e.add(new Event(events.getJSONObject(i).toString()));
+                    }
+                    mDatabaseHandler.insertEvent(e);
+                } catch (JSONException e) {
+                    Log.i("HTTP", "Event object not found");
+                }
+                try {
+                    JSONArray attendance = response.getJSONArray(PassionAttendance.KEY_ATTENDANCE);
+                    ArrayList<Attendance> a = new ArrayList<>();
+                    for (int i = 0; i < attendance.length(); i++) {
+                        a.add(new Attendance(attendance.getJSONObject(i).toString()));
+                    }
+                    mDatabaseHandler.insertAttendance(a);
+                } catch (JSONException e) {
+                    Log.i("HTTP", "Attendance object not found");
+                }
+                try {
+                    JSONObject shift = response.getJSONObject(PassionAttendance.KEY_SHIFT);
+                    mDatabaseHandler.insertShift(new Shift(shift.toString()));
+                } catch (JSONException e) {
+                    Log.i("HTTP", "Shift object not found");
+                }
+            }
         }
     }
 }

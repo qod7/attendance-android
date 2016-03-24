@@ -73,7 +73,7 @@ public class InboxFragment extends Fragment {
     }
 
     public void loadView(LocalDate selectedDate) {
-        mFragmentTitle.setText("Events");
+        mFragmentTitle.setText("Messages");
 
         mMessageList = mDatabaseHandler.retrieveMessages(selectedDate);
         mMessageListAdapter.notifyDataSetChanged();

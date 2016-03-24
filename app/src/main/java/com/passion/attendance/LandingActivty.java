@@ -7,6 +7,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import org.joda.time.DateTimeZone;
+import org.joda.time.LocalTime;
+
 public class LandingActivty extends AppCompatActivity implements View.OnClickListener{
 
     @Override
@@ -17,9 +20,23 @@ public class LandingActivty extends AppCompatActivity implements View.OnClickLis
         Button GetStartedButton = (Button) findViewById(R.id.get_started_button);
 
         if (BuildConfig.DEBUG) {
-            startActivtyWithDummyCredentials();
+            runTest();
+//            startActivtyWithDummyCredentials();
         }
         GetStartedButton.setOnClickListener(this);
+    }
+
+    private void runTest() {
+        LocalTime nowUTC = LocalTime.now(DateTimeZone.UTC);
+        LocalTime now = LocalTime.now();
+
+        long millis = nowUTC.getMillisOfDay();
+
+        long diff = now.getMillisOfDay() - nowUTC.getMillisOfDay();
+
+        Log.i("Time Zone", "Offset: " + diff);
+        Log.i("Time", "UTC: " + new LocalTime(millis, DateTimeZone.UTC));
+        Log.i("Time", "Local: " + new LocalTime(millis + diff, DateTimeZone.UTC));
     }
 
     @Override

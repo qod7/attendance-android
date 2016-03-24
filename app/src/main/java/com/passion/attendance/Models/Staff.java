@@ -1,5 +1,10 @@
 package com.passion.attendance.Models;
 
+import com.passion.attendance.PassionAttendance;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.HashMap;
 
 /**
@@ -74,6 +79,28 @@ public class Staff {
         this.preferences = new HashMap<>();
     }
 
+    public Staff(String staff) {
+        try {
+            JSONObject s = new JSONObject(staff);
+
+            this.id = s.getInt(PassionAttendance.KEY_ID);
+            this.name = s.getString(PassionAttendance.KEY_NAME);
+            this.organization = s.getString(PassionAttendance.KEY_ORGANIZATION);
+            this.imageUrl = s.getString(PassionAttendance.KEY_IMAGE_URL);
+            this.contactNumber = s.getString(PassionAttendance.KEY_CONTACT_NUMBER);
+            this.extras = PassionAttendance.getStringMapFromString(
+                    s.getString(PassionAttendance.KEY_EXTRAS)
+            );
+            this.preferences = PassionAttendance.getStringMapFromString(
+                    s.getString(PassionAttendance.KEY_PREFERENCES)
+            );
+        } catch (JSONException e) {
+            throw new ClassCastException("Could not cast String to Staff");
+        }
+
+
+    }
+
 
     public Integer getId() {
         return id;
@@ -104,7 +131,7 @@ public class Staff {
     }
 
     public String getExtra(String key) {
-        return (String) this.extras.get(key);
+        return this.extras.get(key);
     }
 
     public HashMap<String, String> getExtras() {

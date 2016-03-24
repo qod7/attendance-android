@@ -9,7 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.passion.attendance.Models.Event;
+import com.passion.attendance.Models.Attendance;
 
 import org.joda.time.LocalDate;
 
@@ -21,10 +21,10 @@ import java.util.ArrayList;
 public class AttendanceFragment extends Fragment {
 
     private final Context mContext;
-    private StaticListView mEventListView;
+    private StaticListView mAttendanceListView;
     private DatabaseHandler mDatabaseHandler;
-    private EventListAdapter mEventListAdapter;
-    private ArrayList<Event> mEventList;
+    private AttendanceAdapter mAttendanceAdapter;
+    private ArrayList<Attendance> mAttendanceList;
     private TextView mFragmentTitle;
 
     public AttendanceFragment() {
@@ -50,11 +50,10 @@ public class AttendanceFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
 
-        mEventList = new ArrayList<>();
+        mAttendanceList = new ArrayList<Attendance>();
         mDatabaseHandler = new DatabaseHandler(mContext);
         mFragmentTitle = (TextView) rootView.findViewById(R.id.detail_title);
-        mEventListView = (StaticListView) rootView.findViewById(R.id.detail_list);
-        mEventListAdapter = new EventListAdapter(mContext, mEventList);
+        mAttendanceListView = (StaticListView) rootView.findViewById(R.id.detail_list);
 
         if (getArguments() == null){
             loadView(LocalDate.now());
@@ -73,7 +72,9 @@ public class AttendanceFragment extends Fragment {
     public void loadView(LocalDate selectedDate) {
         mFragmentTitle.setText("Events");
 
-        mEventList = mDatabaseHandler.retrieveEvents(selectedDate);
-        mEventListAdapter.notifyDataSetChanged();
+        mAttendanceList = mDatabaseHandler.retrieveAttendance(selectedDate);
+
+        mAttendanceAdapter = new AttendanceAdapter(mContext, mAttendanceList);
+        mAttendanceListView.setAdapter(mAttendanceAdapter);
     }
 }

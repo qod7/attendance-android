@@ -13,13 +13,14 @@ import android.util.Log;
 import com.passion.attendance.Models.Attendance;
 import com.passion.attendance.Models.Event;
 import com.passion.attendance.Models.Message;
+import com.passion.attendance.Models.Shift;
 import com.passion.attendance.Models.Staff;
 
 import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-
 /**
  * Created by Aayush on 3/10/2016.
  */
@@ -59,8 +60,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(PassionAttendance.KEY_ID, event.getId());
         values.put(PassionAttendance.KEY_TITLE, event.getTitle());
         values.put(PassionAttendance.KEY_DESCRIPTION, event.getDescription());
-        values.put(PassionAttendance.KEY_FROM, event.getFrom().toDate().getTime());
-        values.put(PassionAttendance.KEY_TO, event.getTo().toDate().getTime());
+        values.put(PassionAttendance.KEY_FROM, event.getFrom().toString());
+        values.put(PassionAttendance.KEY_TO, event.getTo().toString());
 
         try {
             db.insertOrThrow("notices", null, values);
@@ -79,8 +80,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             values.put(PassionAttendance.KEY_ID, event.getId());
             values.put(PassionAttendance.KEY_TITLE, event.getTitle());
             values.put(PassionAttendance.KEY_DESCRIPTION, event.getDescription());
-            values.put(PassionAttendance.KEY_FROM, event.getFrom().toDate().getTime());
-            values.put(PassionAttendance.KEY_TO, event.getTo().toDate().getTime());
+            values.put(PassionAttendance.KEY_FROM, event.getFrom().toString());
+            values.put(PassionAttendance.KEY_TO, event.getTo().toString());
 
             try {
                 db.insertOrThrow("events", null, values);
@@ -99,7 +100,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(PassionAttendance.KEY_TITLE, message.getTitle());
         values.put(PassionAttendance.KEY_CONTENT, message.getContent());
         values.put(PassionAttendance.KEY_TYPE, message.getType());
-        values.put(PassionAttendance.KEY_SENT, message.getSentOn().toDate().getTime());
+        values.put(PassionAttendance.KEY_SENT, message.getSentOn().toString());
 
         try {
             db.insertOrThrow("notices", null, values);
@@ -120,7 +121,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             values.put(PassionAttendance.KEY_TITLE, message.getTitle());
             values.put(PassionAttendance.KEY_CONTENT, message.getContent());
             values.put(PassionAttendance.KEY_TYPE, message.getType());
-            values.put(PassionAttendance.KEY_SENT, message.getSentOn().toDate().getTime());
+            values.put(PassionAttendance.KEY_SENT, message.getSentOn().toString());
 
             try {
                 db.insertOrThrow("notices", null, values);
@@ -135,9 +136,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = getWritableDatabase();
 
         ContentValues values = new ContentValues();
+
         values.put(PassionAttendance.KEY_ID, attendance.getId());
-        values.put(PassionAttendance.KEY_IS_PRESENT, attendance.getAttendance());
-        values.put(PassionAttendance.KEY_DATE, attendance.getDate().toDate().getTime());
+        values.put(PassionAttendance.KEY_DATE, attendance.getDate().toString());
+        values.put(PassionAttendance.KEY_FROM, attendance.getFrom().toString());
+        values.put(PassionAttendance.KEY_TO, attendance.getTo().toString());
+        values.put(PassionAttendance.KEY_IS_PRESENT, attendance.getIsPresenct());
 
         try {
             db.insertOrThrow("notices", null, values);
@@ -155,8 +159,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         for (Attendance attendance : attendances) {
             values.put(PassionAttendance.KEY_ID, attendance.getId());
-            values.put(PassionAttendance.KEY_IS_PRESENT, attendance.getAttendance());
-            values.put(PassionAttendance.KEY_DATE, attendance.getDate().toDate().getTime());
+            values.put(PassionAttendance.KEY_DATE, attendance.getDate().toString());
+            values.put(PassionAttendance.KEY_FROM, attendance.getFrom().toString());
+            values.put(PassionAttendance.KEY_TO, attendance.getTo().toString());
+            values.put(PassionAttendance.KEY_IS_PRESENT, attendance.getIsPresenct());
 
             try {
                 db.insertOrThrow("notices", null, values);
@@ -178,16 +184,31 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 .putString(PassionAttendance.KEY_ORGANIZATION, staff.getOrganization())
                 .putString(PassionAttendance.KEY_IMAGE_URL, staff.getImageUrl())
                 .putString(PassionAttendance.KEY_CONTACT_NUMBER, staff.getContactNumber())
-                .putString(PassionAttendance.KEY_EXTRAS, PassionAttendance.getStringFromMap(staff.getExtras()))
-                .putString(PassionAttendance.KEY_PREFERENCES, PassionAttendance.getStringFromMap(staff.getPreferences()))
+                .putString(
+                        PassionAttendance.KEY_EXTRAS,
+                        PassionAttendance.getStringFromStringMap(staff.getExtras())
+                )
+                .putString(
+                        PassionAttendance.KEY_PREFERENCES,
+                        PassionAttendance.getStringFromStringMap(staff.getPreferences())
+                )
                 .apply();
+    }
+
+    public void insertShift(Shift shift) {
+        SharedPreferences sp = context.getSharedPreferences(PassionAttendance.PREFERENCE_STAFF,
+                Context.MODE_PRIVATE);
+
+        sp.edit().putString(PassionAttendance.KEY_SHIFT, shift.toString()).apply();
     }
 
     public Staff retrieveStaff() {
         SharedPreferences sp;
         try {
-            sp = context.getSharedPreferences(PassionAttendance.PREFERENCE_STAFF,
-                    Context.MODE_PRIVATE);
+            sp = context.getSharedPreferences(
+                    PassionAttendance.PREFERENCE_STAFF,
+                    Context.MODE_PRIVATE
+            );
         } catch (NullPointerException e) {
             return null;
         }
@@ -198,12 +219,23 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         String image = sp.getString(PassionAttendance.KEY_IMAGE_URL, "");
         String contact = sp.getString(PassionAttendance.KEY_CONTACT_NUMBER, "");
 
-        HashMap<String, String> extras = PassionAttendance.getMapFromString(sp.getString(PassionAttendance.KEY_EXTRAS,
-                ""));
-        HashMap<String, String> preferences = PassionAttendance.getMapFromString(sp.getString(PassionAttendance.KEY_PREFERENCES,
-                ""));
+        HashMap<String, String> extras = PassionAttendance.getStringMapFromString(
+                sp.getString(PassionAttendance.KEY_EXTRAS, "")
+        );
+        HashMap<String, String> preferences = PassionAttendance.getStringMapFromString(
+                sp.getString(PassionAttendance.KEY_PREFERENCES, "")
+        );
 
         return new Staff(id, name, organization, image, contact, extras, preferences);
+    }
+
+    public Shift retrieveShift() {
+        SharedPreferences sp = context.getSharedPreferences(
+                PassionAttendance.PREFERENCE_STAFF,
+                Context.MODE_PRIVATE
+        );
+
+        return new Shift(sp.getString(PassionAttendance.KEY_SHIFT, ""));
     }
 
     public ArrayList<Attendance> retrieveAttendances() {
@@ -217,10 +249,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             c.moveToFirst();
             while (!c.isAfterLast()) {
                 Integer id = c.getInt(c.getColumnIndex(PassionAttendance.KEY_ID));
+                LocalDate date = new LocalDate(c.getString(c.getColumnIndex(PassionAttendance.KEY_DATE)));
+                LocalTime from = new LocalTime(c.getString(c.getColumnIndex(PassionAttendance.KEY_FROM)));
+                LocalTime to = new LocalTime(c.getString(c.getColumnIndex(PassionAttendance.KEY_TO)));
                 Boolean isPresent = c.getInt(c.getColumnIndex(PassionAttendance.KEY_IS_PRESENT)) != 0;
-                LocalDate date = new LocalDate(c.getInt(c.getColumnIndex(PassionAttendance.KEY_DATE)));
 
-                attendances.add(new Attendance(id, date, isPresent));
+                attendances.add(new Attendance(id, date, from, to, isPresent));
 
                 c.moveToNext();
             }
@@ -231,7 +265,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return attendances;
     }
 
-    public ArrayList<Attendance> retrieveAttendances(LocalDate d) {
+    public ArrayList<Attendance> retrieveAttendance(LocalDate d) {
         SQLiteDatabase db = getReadableDatabase();
 
         String Query = String.format("SELECT * FROM attendances WHERE %s = \"%d\";",
@@ -246,10 +280,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             c.moveToFirst();
             while (!c.isAfterLast()) {
                 Integer id = c.getInt(c.getColumnIndex(PassionAttendance.KEY_ID));
+                LocalDate date = new LocalDate(c.getString(c.getColumnIndex(PassionAttendance.KEY_DATE)));
+                LocalTime from = new LocalTime(c.getString(c.getColumnIndex(PassionAttendance.KEY_FROM)));
+                LocalTime to = new LocalTime(c.getString(c.getColumnIndex(PassionAttendance.KEY_TO)));
                 Boolean isPresent = c.getInt(c.getColumnIndex(PassionAttendance.KEY_IS_PRESENT)) != 0;
-                LocalDate date = new LocalDate(c.getInt(c.getColumnIndex(PassionAttendance.KEY_DATE)));
 
-                attendances.add(new Attendance(id, date, isPresent));
+                attendances.add(new Attendance(id, date, from, to, isPresent));
 
                 c.moveToNext();
             }
@@ -273,8 +309,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 Integer id = c.getInt(c.getColumnIndex(PassionAttendance.KEY_ID));
                 String title = c.getString(c.getColumnIndex(PassionAttendance.KEY_TITLE));
                 String description = c.getString(c.getColumnIndex(PassionAttendance.KEY_DESCRIPTION));
-                LocalDate from = new LocalDate(c.getInt(c.getColumnIndex(PassionAttendance.KEY_FROM)));
-                LocalDate to = new LocalDate(c.getInt(c.getColumnIndex(PassionAttendance.KEY_TO)));
+                LocalDate from = new LocalDate(c.getString(c.getColumnIndex(PassionAttendance.KEY_FROM)));
+                LocalDate to = new LocalDate(c.getString(c.getColumnIndex(PassionAttendance.KEY_TO)));
 
                 events.add(new Event(id, title, description, from, to));
 
@@ -306,8 +342,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 Integer id = c.getInt(c.getColumnIndex(PassionAttendance.KEY_ID));
                 String title = c.getString(c.getColumnIndex(PassionAttendance.KEY_TITLE));
                 String description = c.getString(c.getColumnIndex(PassionAttendance.KEY_DESCRIPTION));
-                LocalDate from = new LocalDate(c.getInt(c.getColumnIndex(PassionAttendance.KEY_FROM)));
-                LocalDate to = new LocalDate(c.getInt(c.getColumnIndex(PassionAttendance.KEY_TO)));
+                LocalDate from = new LocalDate(c.getString(c.getColumnIndex(PassionAttendance.KEY_FROM)));
+                LocalDate to = new LocalDate(c.getString(c.getColumnIndex(PassionAttendance.KEY_TO)));
 
                 events.add(new Event(id, title, description, from, to));
 
@@ -333,7 +369,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 Integer id = c.getInt(c.getColumnIndex(PassionAttendance.KEY_ID));
                 String title = c.getString(c.getColumnIndex(PassionAttendance.KEY_TITLE));
                 String content = c.getString(c.getColumnIndex(PassionAttendance.KEY_CONTENT));
-                LocalDate sent = new LocalDate(c.getInt(c.getColumnIndex(PassionAttendance.KEY_SENT)));
+                LocalDate sent = new LocalDate(c.getString(c.getColumnIndex(PassionAttendance.KEY_SENT)));
                 Integer type = c.getInt(c.getColumnIndex(PassionAttendance.KEY_TYPE));
 
                 messages.add(new Message(id, title, content, type, sent));
@@ -364,7 +400,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 Integer id = c.getInt(c.getColumnIndex(PassionAttendance.KEY_ID));
                 String title = c.getString(c.getColumnIndex(PassionAttendance.KEY_TITLE));
                 String content = c.getString(c.getColumnIndex(PassionAttendance.KEY_CONTENT));
-                LocalDate sent = new LocalDate(c.getInt(c.getColumnIndex(PassionAttendance.KEY_SENT)));
+                LocalDate sent = new LocalDate(c.getString(c.getColumnIndex(PassionAttendance.KEY_SENT)));
                 Integer type = c.getInt(c.getColumnIndex(PassionAttendance.KEY_TYPE));
 
                 messages.add(new Message(id, title, content, type, sent));

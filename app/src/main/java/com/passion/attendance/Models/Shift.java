@@ -1,12 +1,15 @@
 package com.passion.attendance.Models;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * Created by Aayush on 3/14/2016.
  */
 public class Shift {
-    ArrayList<TimeRange> timeRanges;
 
     public final String[] days = {
             "Sunday",
@@ -17,9 +20,24 @@ public class Shift {
             "Friday",
             "Saturday"
     };
+    ArrayList<TimeRange> timeRanges;
 
     public Shift(ArrayList<TimeRange> timeRanges) {
         this.timeRanges = timeRanges;
+    }
+
+    public Shift(String shift) {
+        try {
+            JSONObject j = new JSONObject(shift);
+
+            Iterator<String> k = j.keys();
+
+            while (k.hasNext())
+                timeRanges.add(new TimeRange(j.getString(k.next())));
+
+        } catch (JSONException e) {
+            throw new ClassCastException("Could not cast String to TimeRange");
+        }
     }
 
     public String getDay(Integer i) {
@@ -30,15 +48,22 @@ public class Shift {
         return timeRanges;
     }
 
-    public void setTimeRanges(ArrayList<TimeRange> timeRanges) {
-        this.timeRanges = timeRanges;
+    public TimeRange getTimeRange(Integer index) {
+        return timeRanges.get(index);
     }
 
-    public void setTimeTable(Integer index, TimeRange timeRange){
-        this.timeRanges.add(index, timeRange);
-    }
+    @Override
+    public String toString() {
 
-    public TimeRange getTimeTable(Integer index){
-        return this.timeRanges.get(index);
+        ArrayList<String> strings = new ArrayList<>();
+        JSONObject j = new JSONObject();
+        try {
+            for (int i = 0; i < this.timeRanges.size(); i++)
+                j.put(String.valueOf(i), this.timeRanges.get(i));
+        } catch (JSONException e) {
+            throw new ClassCastException("Could not cast Shift to String");
+        }
+
+        return j.toString();
     }
 }
