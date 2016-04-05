@@ -1,13 +1,15 @@
 package com.passion.attendance.Models;
 
+import android.util.Log;
+
 import com.passion.attendance.PassionAttendance;
 
+import org.joda.time.DateTimeZone;
 import org.joda.time.LocalTime;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
-import java.security.InvalidParameterException;
 
 /**
  * Created by Aayush on 3/14/2016.
@@ -21,11 +23,30 @@ public class TimeRange implements Serializable {
         this.to = to;
     }
 
-    public TimeRange(String timeRangeString) throws InvalidParameterException {
-        String[] stringArray = timeRangeString.split("\n");
+    public TimeRange(String timeRangeString) {
+        try {
+            JSONObject t = new JSONObject(timeRangeString);
 
-        this.from = new LocalTime(stringArray[0]);
-        this.to = new LocalTime(stringArray[1]);
+            try {
+                this.from = new LocalTime(
+                        t.getInt(PassionAttendance.KEY_FROM) + PassionAttendance.TIME_OFFSET,
+                        DateTimeZone.UTC
+                );
+            } catch (JSONException e) {
+                this.from = new LocalTime(t.getString(PassionAttendance.KEY_FROM));
+            }
+
+            try {
+                this.to = new LocalTime(
+                        t.getInt(PassionAttendance.KEY_TO) + PassionAttendance.TIME_OFFSET,
+                        DateTimeZone.UTC
+                );
+            } catch (JSONException e) {
+                this.to = new LocalTime(t.getString(PassionAttendance.KEY_TO));
+            }
+        } catch (JSONException e) {
+            throw new ClassCastException("Could not cast String to TimeRange: " + timeRangeString);
+        }
     }
 
     public LocalTime getFrom() {

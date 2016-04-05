@@ -18,7 +18,6 @@ import org.joda.time.LocalDate;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 /**
  * Created by Aayush on 11/27/2015.
@@ -30,6 +29,9 @@ public class CalendarAdapter extends BaseAdapter {
 
     private List<LocalDate> DateList;
 
+    private ArrayList<Integer> MessageCount;
+    private ArrayList<Integer> EventCount;
+
     private Context context;
 
     private LocalDate mSelected;
@@ -38,6 +40,8 @@ public class CalendarAdapter extends BaseAdapter {
         this.context = context;
 
         this.DateList = new ArrayList<>();
+        this.MessageCount = new ArrayList<>();
+        this.EventCount = new ArrayList<>();
 
         GregorianDate = DateTime.now().toLocalDate();
 
@@ -77,6 +81,8 @@ public class CalendarAdapter extends BaseAdapter {
             convertView = vi.inflate(R.layout.layout_calendar_cell, null);
         }
 
+        LocalDate now = DateList.get(position);
+
         TextView dateOfMonth = (TextView) convertView.findViewById(R.id.date_of_month);
         TextView altDateOfMonth = (TextView) convertView.findViewById(R.id.alternate_date_of_month);
 
@@ -84,26 +90,27 @@ public class CalendarAdapter extends BaseAdapter {
 
         dateOfMonth.setTextColor(Color.BLACK);
 
-        View attendanceIndicator = convertView.findViewById(R.id.attendance_indicator),
-                noticeIndicator = convertView.findViewById(R.id.notice_indicator),
+        View messageIndicator = convertView.findViewById(R.id.message_indicator),
                 eventIndicator = convertView.findViewById(R.id.event_indicator),
                 hudContainer = convertView.findViewById(R.id.hud_container);
 
         {
-            Random rand = new Random();
-            Boolean value1 = rand.nextBoolean(),
-                    value2 = rand.nextBoolean(),
-                    value3 = rand.nextBoolean();
+
+            DatabaseHandler db = new DatabaseHandler(context);
+
+//            Boolean messageCondition = MessageCount.get(position) > 0,
+//                    eventCondition = EventCount.get(position) > 0;
+
+
+            Boolean messageCondition = db.getMessagesCount(now) > 0,
+                    eventCondition = db.getEventsCount(now) > 0;
 
             int VISIBLE = View.VISIBLE, GONE = View.GONE;
 
-            if (value1) attendanceIndicator.setVisibility(VISIBLE);
-            else attendanceIndicator.setVisibility(GONE);
+            if (messageCondition) messageIndicator.setVisibility(VISIBLE);
+            else messageIndicator.setVisibility(GONE);
 
-            if (value2) noticeIndicator.setVisibility(VISIBLE);
-            else noticeIndicator.setVisibility(GONE);
-
-            if (value3) eventIndicator.setVisibility(VISIBLE);
+            if (eventCondition) eventIndicator.setVisibility(VISIBLE);
             else eventIndicator.setVisibility(GONE);
         }
 
@@ -178,6 +185,8 @@ public class CalendarAdapter extends BaseAdapter {
         NepaliDate tempNepaliDate;
 
         DateList.clear();
+        EventCount.clear();
+        MessageCount.clear();
 
         try {
             tempNepaliDate = NepaliCalendar.convertGregorianToNepaliDate(currentDate.toDate());
@@ -190,7 +199,7 @@ public class CalendarAdapter extends BaseAdapter {
             int currentMonth = tempNepaliDate.getMonthNumber(),
                     currentYear = tempNepaliDate.getYear();
 
-            tempGregorianDate = tempGregorianDate.minusDays(tempGregorianDate.getDayOfWeek());
+            tempGregorianDate = tempGregorianDate.minusDays(tempGregorianDate.getDayOfWeek() % 7);
             tempNepaliDate = NepaliCalendar.convertGregorianToNepaliDate(tempGregorianDate.toDate());
 
             while ((currentYear == tempNepaliDate.getYear() && currentMonth >= tempNepaliDate.getMonthNumber()) ||
@@ -202,12 +211,12 @@ public class CalendarAdapter extends BaseAdapter {
 
             }
 
-            if (tempGregorianDate.getDayOfWeek() != 0)
+            if (tempGregorianDate.getDayOfWeek() % 7 != 0)
                 for (int i = tempGregorianDate.getDayOfWeek(); i <= 6; i++) {
                     DateList.add(tempGregorianDate);
-
                     tempGregorianDate = tempGregorianDate.plusDays(1);
                 }
+
 
         } catch (NepaliDateException e) {
             e.printStackTrace();

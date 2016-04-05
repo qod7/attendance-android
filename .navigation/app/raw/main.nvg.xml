@@ -8,16 +8,32 @@
         class = "com.android.tools.idea.editors.navigation.model.ActivityState"      
         className = "com.passion.attendance.LandingActivty"/>
       <point      
-        x = "1688"      
-        y = "32"/>
+        x = "2200"      
+        y = "936"/>
+    </statePointEntry>
+    <statePointEntry>
+      <state      
+        class = "com.android.tools.idea.editors.navigation.model.ActivityState"      
+        className = "com.passion.attendance.SettingsActivity"/>
+      <point      
+        x = "3508"      
+        y = "860"/>
     </statePointEntry>
     <statePointEntry>
       <state      
         class = "com.android.tools.idea.editors.navigation.model.ActivityState"      
         className = "com.passion.attendance.LoginActivity"/>
       <point      
-        x = "532"      
-        y = "20"/>
+        x = "1304"      
+        y = "1312"/>
+    </statePointEntry>
+    <statePointEntry>
+      <state      
+        class = "com.android.tools.idea.editors.navigation.model.ActivityState"      
+        className = "com.passion.attendance.OverviewActivity"/>
+      <point      
+        x = "340"      
+        y = "876"/>
     </statePointEntry>
   </locations>
 </navigationModel>

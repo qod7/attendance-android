@@ -50,7 +50,7 @@
             style="@style/QuickActionButtons"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:src="@drawable/ic_message" />
+            android:src="@drawable/ic_message_reply" />
 
         <ImageButton
             android:id="@+id/content_delete_button"

@@ -43,7 +43,12 @@ public class Message {
             this.title = m.getString(PassionAttendance.KEY_TITLE);
             this.content = m.getString(PassionAttendance.KEY_CONTENT);
             this.type = m.getInt(PassionAttendance.KEY_TYPE);
-            this.sentOn = new LocalDate(m.getString(PassionAttendance.KEY_SENT));
+            try {
+                this.sentOn = new LocalDate(m.getInt(PassionAttendance.KEY_SENT));
+            } catch (NumberFormatException e) {
+                this.sentOn = new LocalDate(m.getString(PassionAttendance.KEY_SENT));
+            }
+
         } catch (JSONException e) {
             throw new ClassCastException("Could not cast String to Message");
         }
@@ -67,5 +72,14 @@ public class Message {
 
     public LocalDate getSentOn() {
         return sentOn;
+    }
+
+    public static Message getDummyMessage(){
+        return new Message(
+                1,
+                "Hello Sir",
+                "How are you",
+                LocalDate.now()
+        );
     }
 }

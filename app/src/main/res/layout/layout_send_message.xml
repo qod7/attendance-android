@@ -39,19 +39,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="5dp"
-        android:minHeight="100dp"
+        android:minLines="3"
         android:gravity="bottom"
         android:hint="Your message here" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="5dp"
-        android:background="@color/LightGrey" />
 
     <Button
         android:id="@+id/message_send"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:backgroundTint="@color/LightGreen"
         android:text="Send"/>
 </LinearLayout>

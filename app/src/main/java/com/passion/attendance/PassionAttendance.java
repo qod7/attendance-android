@@ -6,8 +6,6 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
-import com.passion.attendance.Models.TimeRange;
-
 import net.danlew.android.joda.JodaTimeAndroid;
 
 import org.inf.nepalicalendar.NepaliCalendar;
@@ -44,8 +42,8 @@ public class PassionAttendance extends Application {
     public static final String KEY_PREFERENCES = "preferences";
     public static final String KEY_TITLE = "title";
     public static final String KEY_DESCRIPTION = "description";
-    public static final String KEY_FROM = "from";
-    public static final String KEY_TO = "to";
+    public static final String KEY_FROM = "datetime_from";
+    public static final String KEY_TO = "datetime_to";
     public static final String KEY_CONTENT = "content";
     public static final String KEY_TYPE = "type";
     public static final String KEY_SENT = "sent";
@@ -65,11 +63,23 @@ public class PassionAttendance extends Application {
     public static final String KEY_MESSAGE = "message";
     public static final String KEY_SHIFT = "shift";
     public static final String KEY_OFFSET = "offset";
+    public static final String KEY_TIME_RANGE = "time_ranges";
+    public static final String KEY_TODAY = "today";
+    public static final String KEY_GCM = "gcm_id";
+    public static final String KEY_SOURCE = "source";
+    public static final String KEY_NOTIFICATION = "notification";
 
     public static final int ACTIVTY_LOGIN = 0;
     public static final int ACTIVTY_OVERVIEW = 1;
+
     public static final String HOST = "www.eattendance.com";
+    public static final int ACTION_LOGOUT = 1;
+    public static final String SENDER_ID = "sender_id";
+    public static final String GCM_ID = "gcm_id";
+
     public static int TIME_OFFSET = -1;
+
+    public static final String ACTION_REMOVE_ITEM = "remove_item";
 
     public static String getStringFromArray(ArrayList<String> shifts) {
         StringBuilder sb = new StringBuilder();
@@ -93,11 +103,6 @@ public class PassionAttendance extends Application {
         return new JSONObject(extras).toString();
     }
 
-    public static String getStringFromTimeRangeMap(HashMap<TimeRange, Boolean> extras) {
-        return new JSONObject(extras).toString();
-    }
-
-
     public static HashMap<String, String> getStringMapFromString(String extras) {
         try {
             HashMap<String, String> map = new HashMap<>();
@@ -112,25 +117,6 @@ public class PassionAttendance extends Application {
             }
             return map;
         } catch (JSONException e){
-            return new HashMap<>();
-        }
-    }
-
-    public static HashMap<TimeRange, Boolean> getTimeRangeMapFromString(String extras) {
-        try {
-            HashMap<TimeRange, Boolean> map = new HashMap<>();
-            JSONObject json = new JSONObject(extras);
-
-            Iterator<?> keys = json.keys();
-
-            while (keys.hasNext()) {
-                TimeRange key = (TimeRange) keys.next();
-                Boolean value = json.getBoolean((String) keys.next());
-
-                map.put(key, value);
-            }
-            return map;
-        } catch (JSONException e) {
             return new HashMap<>();
         }
     }
@@ -150,7 +136,7 @@ public class PassionAttendance extends Application {
 
             dateString = String.format(
                     "%s, %s %d, %d",
-                    localDate.toString("EE"),
+                    localDate.toString("EEEE"),
                     nowNepali.getMonthName(),
                     nowNepali.getDay(),
                     nowNepali.getYear()
@@ -162,6 +148,23 @@ public class PassionAttendance extends Application {
         return dateString;
     }
 
+    public static String getDisplayedShortDate(LocalDate localDate) {
+        String dateString = "";
+        try {
+            NepaliDate nowNepali = NepaliCalendar.convertGregorianToNepaliDate(localDate.toDate());
+
+            dateString = String.format(
+                    "%s %d, %d",
+                    nowNepali.getMonthName(),
+                    nowNepali.getDay(),
+                    nowNepali.getYear()
+            );
+
+        } catch (NepaliDateException e) {
+            e.printStackTrace();
+        }
+        return dateString;
+    }
 
     @Override
     public void onCreate() {

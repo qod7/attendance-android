@@ -31,19 +31,34 @@ public class Attendance {
         try {
             JSONObject j = new JSONObject(attendance);
             this.id = j.getInt(PassionAttendance.KEY_ID);
-            this.date = new LocalDate(j.getInt(PassionAttendance.KEY_DATE));
-            this.from = new LocalTime(
-                    j.getInt(PassionAttendance.KEY_FROM) + PassionAttendance.TIME_OFFSET,
-                    DateTimeZone.UTC
-            );
-            this.to = new LocalTime(
-                    j.getInt(PassionAttendance.KEY_TO) + PassionAttendance.TIME_OFFSET,
-                    DateTimeZone.UTC
-            );
             this.presence = j.getBoolean(PassionAttendance.KEY_IS_PRESENT);
-        } catch (JSONException e) {
+            try {
+                this.date = new LocalDate(j.getInt(PassionAttendance.KEY_DATE));
+            } catch (NumberFormatException e) {
+                this.date = new LocalDate(j.getString(PassionAttendance.KEY_DATE));
+            }
+            try {
+                this.from = new LocalTime(
+                        j.getInt(PassionAttendance.KEY_FROM) + PassionAttendance.TIME_OFFSET,
+                        DateTimeZone.UTC
+                );
+            } catch (NumberFormatException e) {
+                this.from = new LocalTime(j.getString(PassionAttendance.KEY_FROM));
+            }
+            try {
+                this.to = new LocalTime(
+                        j.getInt(PassionAttendance.KEY_TO) + PassionAttendance.TIME_OFFSET,
+                        DateTimeZone.UTC
+                );
+            } catch (NumberFormatException e) {
+                this.to = new LocalTime(j.getString(PassionAttendance.KEY_TO));
+            }
+        } catch (JSONException e)
+
+        {
             throw new ClassCastException("Could not cast String to Attendance");
         }
+
     }
 
     public Integer getId() {
@@ -79,5 +94,15 @@ public class Attendance {
             throw new ClassCastException("Could not cast Attendance to String");
         }
         return j.toString();
+    }
+
+    public static Attendance getDummyAttendance(){
+        return new Attendance(
+                1,
+                LocalDate.now(),
+                LocalTime.now().minusHours(2),
+                LocalTime.now().minusHours(1),
+                true
+        );
     }
 }

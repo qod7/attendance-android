@@ -40,8 +40,16 @@ public class Event {
             this.id = j.getInt(PassionAttendance.KEY_ID);
             this.title = j.getString(PassionAttendance.KEY_TITLE);
             this.description = j.getString(PassionAttendance.KEY_DESCRIPTION);
-            this.from = new LocalDate(j.getString(PassionAttendance.KEY_FROM));
-            this.to = new LocalDate(j.getString(PassionAttendance.KEY_TO));
+            try {
+                this.from = new LocalDate(j.getInt(PassionAttendance.KEY_FROM));
+            } catch (NumberFormatException e) {
+                this.from = new LocalDate(j.getString(PassionAttendance.KEY_FROM));
+            }
+            try {
+                this.to = new LocalDate(j.getInt(PassionAttendance.KEY_TO));
+            } catch (NumberFormatException e) {
+                this.to = new LocalDate(j.getString(PassionAttendance.KEY_TO));
+            }
         } catch (JSONException e) {
             throw new ClassCastException("Could not cast String to Event");
         }
@@ -65,5 +73,15 @@ public class Event {
 
     public LocalDate getTo() {
         return to;
+    }
+
+    public static Event getDummyEvent(){
+        return new Event(
+                1,
+                "Event for donation",
+                "This is a donation event",
+                LocalDate.now(),
+                LocalDate.now().plusDays(5)
+        );
     }
 }

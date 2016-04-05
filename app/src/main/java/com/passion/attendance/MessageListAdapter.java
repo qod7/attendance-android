@@ -2,7 +2,9 @@ package com.passion.attendance;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,10 +29,13 @@ public class MessageListAdapter extends BaseAdapter {
 
     List<Message> mMessageList;
     private Context context;
+    private LocalBroadcastManager mBroadcastManager;
 
     public MessageListAdapter(Context context, List<Message> mMessageList) {
         this.mMessageList = mMessageList;
         this.context = context;
+
+        mBroadcastManager = LocalBroadcastManager.getInstance(context);
     }
 
     @Override
@@ -80,7 +85,7 @@ public class MessageListAdapter extends BaseAdapter {
         title.setText(messageTitle);
         content.setText(messageContent);
         from.setText(
-                PassionAttendance.getDisplayedDate(messageDate)
+                PassionAttendance.getDisplayedShortDate(messageDate)
         );
 
         // Populating the logo
@@ -98,6 +103,10 @@ public class MessageListAdapter extends BaseAdapter {
                 if (db.deleteMessage(m.getId())) {
                     mMessageList.remove(i);
                     notifyDataSetChanged();
+
+                    Intent i = new Intent();
+                    i.setAction(PassionAttendance.ACTION_REMOVE_ITEM);
+                    mBroadcastManager.sendBroadcast(i);
                 }
             }
         });

@@ -165,9 +165,20 @@
     <color name="FaintDark">#05000000</color>
     <color name="FaintLight">#05FFFFFF</color>
     <color name="SemiTransparentLight">#0FFFFFFF</color>
-    <color name="SemiTransparentDark">#0F000000</color>
+    <color name="SemiTransparentDark">#50000000</color>
     <color name="SemiTransparentDarker">#50000000</color>
     <color name="Transparent">#00000000</color>
+
+    <color name="ListRed">#F44336</color>
+    <color name="ListPink">#E91E63</color>
+    <color name="ListPurple">#9C27B0</color>
+    <color name="ListDeepPurple">#673AB7</color>
+    <color name="ListIndigo">#3F51B5</color>
+    <color name="ListTeal">#009688</color>
+    <color name="ListGreen">#4CAF50</color>
+    <color name="ListAmber">#FFC107</color>
+    <color name="ListOrange">#FF9800</color>
+    <color name="ListDeepOrange">#FF5722</color>
 
     <color name="separator">#FFEEEEEE</color>
 </resources>

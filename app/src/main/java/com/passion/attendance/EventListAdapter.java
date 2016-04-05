@@ -1,7 +1,9 @@
 package com.passion.attendance;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,19 +17,23 @@ import com.passion.attendance.Models.Event;
 
 import org.joda.time.LocalDate;
 
-import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Created by Aayush on 1/2/2016.
  */
 public class EventListAdapter extends BaseAdapter {
 
-    List<Event> mEventList;
+    ArrayList<Event> mEventList;
     private Context context;
 
-    public EventListAdapter(Context context, List<Event> mEventList) {
+    LocalBroadcastManager mBroadcastManager;
+
+    public EventListAdapter(Context context, ArrayList<Event> mEventList) {
         this.mEventList = mEventList;
         this.context = context;
+
+        mBroadcastManager = LocalBroadcastManager.getInstance(context);
     }
 
     @Override
@@ -62,11 +68,11 @@ public class EventListAdapter extends BaseAdapter {
         ImageButton deleteButton = (ImageButton) view.findViewById(R.id.content_delete_button);
 
         View fromContainer = view.findViewById(R.id.event_from_desc);
-        TextView fromLabel = (TextView) view.findViewById(R.id.event_from_desc);
+        TextView fromLabel = (TextView) view.findViewById(R.id.event_from_label);
         TextView from = (TextView) view.findViewById(R.id.content_from_date);
 
         View toContainer = view.findViewById(R.id.event_to_desc);
-        TextView toLabel = (TextView) view.findViewById(R.id.event_to_desc);
+        TextView toLabel = (TextView) view.findViewById(R.id.event_to_label);
         TextView to = (TextView) view.findViewById(R.id.content_to_date);
 
         final Event e = mEventList.get(i);
@@ -98,7 +104,7 @@ public class EventListAdapter extends BaseAdapter {
             fromLabel.setText("At:");
 
             from.setText(
-                    PassionAttendance.getDisplayedDate(eventTo)
+                    PassionAttendance.getDisplayedShortDate(eventTo)
             );
         } else {
             toContainer.setVisibility(View.VISIBLE);
@@ -106,11 +112,11 @@ public class EventListAdapter extends BaseAdapter {
             fromLabel.setText("From:");
 
             from.setText(
-                    PassionAttendance.getDisplayedDate(eventFrom)
+                    PassionAttendance.getDisplayedShortDate(eventFrom)
             );
 
             to.setText(
-                    PassionAttendance.getDisplayedDate(eventFrom)
+                    PassionAttendance.getDisplayedShortDate(eventTo)
             );
         }
 
@@ -120,10 +126,13 @@ public class EventListAdapter extends BaseAdapter {
                 if (db.deleteEvent(e.getId())) {
                     mEventList.remove(i);
                     notifyDataSetChanged();
+
+                    Intent i = new Intent();
+                    i.setAction(PassionAttendance.ACTION_REMOVE_ITEM);
+                    mBroadcastManager.sendBroadcast(i);
                 }
             }
         });
-
 
         return view;
     }

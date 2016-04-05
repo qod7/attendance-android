@@ -73,4 +73,13 @@
     <string name="pref_ringtone_silent">Silent</string>
 
     <string name="pref_title_vibrate">Vibrate</string>
+    <string name="view_messages">View messages</string>
+    <string name="view_events">View events</string>
+    <string name="menu_sync">Sync data</string>
+    <string name="menu_logout">Logout</string>
+    <string name="title_activity_messages">Messages</string>
+    <string name="title_activity_events">Events</string>
+    <string name="title_activity_shifts">Shift</string>
+    <string name="view_shifts">View Shift</string>
+    <string name="title_activity_main">MainActivity</string>
 </resources>

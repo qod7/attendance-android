@@ -9,7 +9,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.TabHost;
 import android.widget.TextView;
+
+import com.amulyakhare.textdrawable.TextDrawable;
+import com.passion.attendance.Models.Shift;
+import com.passion.attendance.Models.TimeRangeList;
 
 import org.joda.time.LocalDate;
 
@@ -28,9 +34,14 @@ public class OverviewFragment extends Fragment {
     private StaticListView mShiftListView;
     private TextView mTodayOverview;
 
-    private EventFragment mEventView;
-    private AttendanceFragment mAttendanceView;
-    private InboxFragment mMessageView;
+    private EventFragment mEventFragment;
+    private AttendanceFragment mAttendanceFragment;
+    private InboxFragment mMessageFragment;
+    private ImageView mShiftImage;
+    private TextView mShiftDay;
+    private View mView;
+
+    public Integer mCurrentView;
 
     public OverviewFragment() {
         mContext = getContext();
@@ -58,32 +69,115 @@ public class OverviewFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        final View rootView = inflater.inflate(R.layout.fragment_day_overview, container, false);
+        final View rootView = inflater.inflate(R.layout.fragment_overview, container, false);
+
+        mContext = getContext();
 
         mTodayDetail = rootView.findViewById(R.id.detail_today_container);
         mSelectedDetail = rootView.findViewById(R.id.detail_selected_date_container);
+
         mDateTextView = (TextView) rootView.findViewById(R.id.selected_date);
         mSwitchViewButton = (ImageButton) rootView.findViewById(R.id.switch_mode_button);
         mShiftListView = (StaticListView) rootView.findViewById(R.id.shift_day_timetables);
         mTodayOverview = (TextView) rootView.findViewById(R.id.today_overview);
 
-        mEventView = EventFragment.newInstance();
-        mAttendanceView = AttendanceFragment.newInstance();
-        mMessageView = InboxFragment.newInstance();
+        mShiftDay = (TextView) rootView.findViewById(R.id.shift_day_name);
+        mShiftImage = (ImageView) rootView.findViewById(R.id.shift_day_image);
+
+        mEventFragment = EventFragment.newInstance();
+        mAttendanceFragment = AttendanceFragment.newInstance();
+        mMessageFragment = InboxFragment.newInstance();
 
         mTabHost = (FragmentTabHost) rootView.findViewById(android.R.id.tabhost);
-        mTabHost.setup(mContext, getFragmentManager(), R.id.realtabcontent);
-
-        LocalDate today = LocalDate.now();
+        mTabHost.setup(mContext, getChildFragmentManager(), android.R.id.tabcontent);
 
         mTabHost.addTab(mTabHost.newTabSpec("tab1").setIndicator("Events"),
-                mEventView.getClass(), null);
+                mEventFragment.getClass(), new Bundle());
         mTabHost.addTab(mTabHost.newTabSpec("tab2").setIndicator("Messages"),
-                mAttendanceView.getClass(), null);
+                mMessageFragment.getClass(), new Bundle());
         mTabHost.addTab(mTabHost.newTabSpec("tab3").setIndicator("Attendance"),
-                mMessageView.getClass(), null);
+                mAttendanceFragment.getClass(), new Bundle());
 
-        setTodayVisible(true);
+        mTabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
+            @Override
+            public void onTabChanged(String tabId) {
+                Bundle args = getArguments();
+
+                int selectedYear = args.getInt(PassionAttendance.KEY_YEAR),
+                        selectedMonth = args.getInt(PassionAttendance.KEY_MONTH),
+                        selectedDay = args.getInt(PassionAttendance.KEY_DAY);
+
+                Fragment parentFragment = OverviewFragment.this;
+                Bundle fragmentArgs;
+
+
+                switch (tabId) {
+                    case "tab1":
+                        EventFragment eventFragment = (EventFragment) parentFragment
+                                .getChildFragmentManager()
+                                .findFragmentByTag(tabId);
+
+                        if (eventFragment != null) { // && !mFragment.isDetached()) {
+                            parentFragment.getChildFragmentManager().beginTransaction()
+                                    .detach(eventFragment)
+                                    .commit();
+
+                            fragmentArgs = eventFragment.getArguments();
+                            fragmentArgs.putInt(PassionAttendance.KEY_YEAR, selectedYear);
+                            fragmentArgs.putInt(PassionAttendance.KEY_MONTH, selectedMonth);
+                            fragmentArgs.putInt(PassionAttendance.KEY_DAY, selectedDay);
+
+                            parentFragment.getChildFragmentManager().beginTransaction()
+                                    .attach(eventFragment)
+                                    .commit();
+                        }
+                        break;
+                    case "tab2":
+                        InboxFragment messageFragment = (InboxFragment) parentFragment
+                                .getChildFragmentManager()
+                                .findFragmentByTag(tabId);
+
+                        if (messageFragment != null) { // && !mFragment.isDetached()) {
+                            parentFragment.getChildFragmentManager().beginTransaction()
+                                    .detach(messageFragment)
+                                    .commit();
+
+                            fragmentArgs = messageFragment.getArguments();
+                            fragmentArgs.putInt(PassionAttendance.KEY_YEAR, selectedYear);
+                            fragmentArgs.putInt(PassionAttendance.KEY_MONTH, selectedMonth);
+                            fragmentArgs.putInt(PassionAttendance.KEY_DAY, selectedDay);
+
+                            parentFragment.getChildFragmentManager().beginTransaction()
+                                    .attach(messageFragment)
+                                    .commit();
+                        }
+                        break;
+                    case "tab3":
+                        AttendanceFragment attendanceFragment = (AttendanceFragment) parentFragment
+                                .getChildFragmentManager()
+                                .findFragmentByTag(tabId);
+
+                        if (attendanceFragment != null) { // && !mFragment.isDetached()) {
+                            parentFragment.getChildFragmentManager().beginTransaction()
+                                    .detach(attendanceFragment)
+                                    .commit();
+
+                            fragmentArgs = attendanceFragment.getArguments();
+                            fragmentArgs.putInt(PassionAttendance.KEY_YEAR, selectedYear);
+                            fragmentArgs.putInt(PassionAttendance.KEY_MONTH, selectedMonth);
+                            fragmentArgs.putInt(PassionAttendance.KEY_DAY, selectedDay);
+
+                            parentFragment.getChildFragmentManager().beginTransaction()
+                                    .attach(attendanceFragment)
+                                    .commit();
+                        }
+                }
+            }
+        });
+
+        Boolean todayOverview = getArguments().getBoolean(PassionAttendance.KEY_TODAY, true);
+
+        setTodayVisible(todayOverview);
 
         mSwitchViewButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -92,10 +186,12 @@ public class OverviewFragment extends Fragment {
             }
         });
 
+        mView = rootView;
+
         return rootView;
     }
 
-    private void setTodayVisible(boolean visibility) {
+    public void setTodayVisible(boolean visibility) {
 
         if (visibility) {
             mTodayDetail.setVisibility(View.VISIBLE);
@@ -115,21 +211,22 @@ public class OverviewFragment extends Fragment {
     public void populateSelected() {
 
         Bundle args = getArguments();
+        int selectedYear = args.getInt(PassionAttendance.KEY_YEAR),
+                selectedMonth = args.getInt(PassionAttendance.KEY_MONTH),
+                selectedDay = args.getInt(PassionAttendance.KEY_DAY);
 
-        // Displaying selected date
-        LocalDate selectedDate = new LocalDate(
-                args.getInt(PassionAttendance.KEY_YEAR),
-                args.getInt(PassionAttendance.KEY_MONTH),
-                args.getInt(PassionAttendance.KEY_DAY)
-        );
+        mDateTextView.setText(PassionAttendance.getDisplayedDate(new LocalDate(
+                selectedYear,
+                selectedMonth,
+                selectedDay
+        )));
 
-        mDateTextView.setText(
-                PassionAttendance.getDisplayedDate(selectedDate)
-        );
+        String currentTab = mTabHost.getCurrentTabTag();
+        mTabHost.onTabChanged(currentTab);
 
-        mMessageView.loadView(selectedDate);
-        mEventView.loadView(selectedDate);
-        mAttendanceView.loadView(selectedDate);
+//        mMessageFragment.updateView(selectedDate);
+//        mEventFragment.updateView(selectedDate);
+//        mAttendanceFragment.updateView(selectedDate);
     }
 
     private void populateToday() {
@@ -143,10 +240,41 @@ public class OverviewFragment extends Fragment {
                 PassionAttendance.getDisplayedDate(selectedDate)
         );
 
+
         Integer msgCount = db.getMessagesCount(selectedDate),
                 eventCount = db.getEventsCount(selectedDate);
 
+//        Integer msgCount = db.getMessagesCount(),
+//                eventCount = db.getEventsCount();
+
+        setShiftListView();
+
         setOverviewMessage(msgCount, eventCount);
+    }
+
+    private void setShiftListView() {
+        DatabaseHandler db = new DatabaseHandler(mContext);
+
+        Shift shift = db.retrieveShift();
+
+        int currentDay = LocalDate.now().getDayOfWeek() % 7;
+
+        mShiftDay.setText(Shift.days[currentDay]);
+
+        mShiftImage.setImageDrawable(
+                TextDrawable.builder()
+                        .buildRound(
+                                String.valueOf(Shift.days[currentDay].charAt(0)),
+                                ColorList.getRandomColor(mContext)
+                        )
+        );
+
+        TimeRangeList trl = shift.getTimeRangeList(currentDay);
+
+        TimeRangeAdapter timeRangeAdapter = new TimeRangeAdapter(mContext, trl);
+
+        mShiftListView.setAdapter(timeRangeAdapter);
+
     }
 
     private void setOverviewMessage(Integer msgCount, Integer eventCount) {
@@ -162,21 +290,22 @@ public class OverviewFragment extends Fragment {
 
             message = message.concat(sb.toString());
         }
-        sb = new StringBuilder();
+        sb = new StringBuilder(message);
 
         if (eventCount != 0) {
             if (message.isEmpty())
-                message = "You have ";
+                sb.append("You have ");
             else
-                message = " and ";
+                sb.append(" and ");
 
             sb.append(eventCount)
                     .append(" event")
                     .append(eventCount > 1 ? "s" : "");
 
-            message = message.concat(sb.toString());
+            message = sb.toString();
         }
 
+//        Snackbar.make(mView, message, Snackbar.LENGTH_SHORT).show();
         mTodayOverview.setText(message);
     }
 

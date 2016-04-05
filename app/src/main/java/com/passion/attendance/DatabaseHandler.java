@@ -21,6 +21,7 @@ import org.joda.time.LocalTime;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+
 /**
  * Created by Aayush on 3/10/2016.
  */
@@ -33,15 +34,55 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     public DatabaseHandler(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
         super(context, DATABASE_NAME, factory, DATABASE_VERSION);
+        this.context = context;
     }
 
     public DatabaseHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+
+        this.context = context;
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String Query;
+
+        String query;
+
+        query = String.format(
+                "CREATE TABLE attendances (%s INTEGER PRIMARY KEY, " +
+                "%s STRING, %s STRING, %s STRING, %s INTEGER);",
+                PassionAttendance.KEY_ID,
+                PassionAttendance.KEY_DATE,
+                PassionAttendance.KEY_FROM,
+                PassionAttendance.KEY_TO,
+                PassionAttendance.KEY_IS_PRESENT
+        );
+        db.execSQL(query);
+        Log.i("Query", query);
+
+        query = String.format(
+                "CREATE TABLE events (%s INTEGER PRIMARY KEY, " +
+                        "%s STRING, %s STRING, %s STRING, %s STRING);",
+                PassionAttendance.KEY_ID,
+                PassionAttendance.KEY_TITLE,
+                PassionAttendance.KEY_DESCRIPTION,
+                PassionAttendance.KEY_FROM,
+                PassionAttendance.KEY_TO
+        );
+        db.execSQL(query);
+        Log.i("Query", query);
+
+        query = String.format(
+                "CREATE TABLE messages (%s INTEGER PRIMARY KEY, " +
+                        "%s STRING, %s STRING, %s INTEGER, %s STRING);",
+                PassionAttendance.KEY_ID,
+                PassionAttendance.KEY_TITLE,
+                PassionAttendance.KEY_CONTENT,
+                PassionAttendance.KEY_TYPE,
+                PassionAttendance.KEY_SENT
+        );
+        db.execSQL(query);
+        Log.i("Query", query);
     }
 
     @Override
@@ -51,6 +92,33 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         context.deleteDatabase(dbName);
 
         onCreate(db);
+    }
+
+    public void clearDatabase(){
+        SQLiteDatabase db = getWritableDatabase();
+
+        String Query;
+
+        Query = "DELETE FROM attendances;";
+        db.execSQL(Query);
+
+        Query = "DELETE FROM messages;";
+        db.execSQL(Query);
+
+        Query = "DELETE FROM events;";
+        db.execSQL(Query);
+
+        db.close();
+
+        SharedPreferences sp = context.getSharedPreferences(
+                PassionAttendance.PREFERENCE_STAFF,
+                Context.MODE_PRIVATE
+        );
+
+        sp.edit()
+                .remove(PassionAttendance.KEY_STAFF)
+                .remove(PassionAttendance.KEY_SHIFT)
+                .apply();
     }
 
     public void insertEvent(Event event) {
@@ -64,7 +132,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(PassionAttendance.KEY_TO, event.getTo().toString());
 
         try {
-            db.insertOrThrow("notices", null, values);
+            db.insertOrThrow("events", null, values);
         } catch (SQLiteConstraintException e) {
             Log.e("Database Error", e.toString());
         }
@@ -103,7 +171,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(PassionAttendance.KEY_SENT, message.getSentOn().toString());
 
         try {
-            db.insertOrThrow("notices", null, values);
+            db.insertOrThrow("messages", null, values);
         } catch (SQLiteConstraintException e) {
             Log.e("Database Error", e.toString());
         }
@@ -124,7 +192,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             values.put(PassionAttendance.KEY_SENT, message.getSentOn().toString());
 
             try {
-                db.insertOrThrow("notices", null, values);
+                db.insertOrThrow("messages", null, values);
             } catch (SQLiteConstraintException e) {
                 Log.e("Database Error", e.toString());
             }
@@ -144,7 +212,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(PassionAttendance.KEY_IS_PRESENT, attendance.getIsPresenct());
 
         try {
-            db.insertOrThrow("notices", null, values);
+            db.insertOrThrow("attendances", null, values);
         } catch (SQLiteConstraintException e) {
             Log.e("Database Error", e.toString());
         }
@@ -165,7 +233,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             values.put(PassionAttendance.KEY_IS_PRESENT, attendance.getIsPresenct());
 
             try {
-                db.insertOrThrow("notices", null, values);
+                db.insertOrThrow("attendances", null, values);
             } catch (SQLiteConstraintException e) {
                 Log.e("Database Error", e.toString());
             }
@@ -241,6 +309,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public ArrayList<Attendance> retrieveAttendances() {
         SQLiteDatabase db = getReadableDatabase();
         String Query = "SELECT * FROM attendances;";
+        Log.i("Query", Query);
+
         Cursor c = db.rawQuery(Query, null);
 
         ArrayList<Attendance> attendances = new ArrayList<>();
@@ -262,16 +332,19 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             e.printStackTrace();
         }
         c.close();
+        db.close();
         return attendances;
     }
 
     public ArrayList<Attendance> retrieveAttendance(LocalDate d) {
         SQLiteDatabase db = getReadableDatabase();
 
-        String Query = String.format("SELECT * FROM attendances WHERE %s = \"%d\";",
+        String Query = String.format("SELECT * FROM attendances WHERE %s = \"%s\";",
                 PassionAttendance.KEY_DATE,
-                d.toDate().getTime()
+                d
         );
+        Log.i("Query", Query);
+
         Cursor c = db.rawQuery(Query, null);
 
         ArrayList<Attendance> attendances = new ArrayList<>();
@@ -293,12 +366,15 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             e.printStackTrace();
         }
         c.close();
+        db.close();
         return attendances;
     }
 
     public ArrayList<Event> retrieveEvents() {
         SQLiteDatabase db = getReadableDatabase();
         String Query = "SELECT * FROM events;";
+        Log.i("Query", Query);
+
         Cursor c = db.rawQuery(Query, null);
 
         ArrayList<Event> events = new ArrayList<>();
@@ -320,18 +396,21 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             e.printStackTrace();
         }
         c.close();
+        db.close();
         return events;
     }
 
     public ArrayList<Event> retrieveEvents(LocalDate d) {
         SQLiteDatabase db = getReadableDatabase();
         String Query = String.format(
-                "SELECT * FROM events WHERE %s >= %d AND %s <= %d;",
+                "SELECT * FROM events WHERE %s <= \"%s\" AND %s >= \"%s\";",
                 PassionAttendance.KEY_FROM,
-                d.toDate().getTime(),
+                d.toString(),
                 PassionAttendance.KEY_TO,
-                d.toDate().getTime()
+                d.toString()
         );
+        Log.i("Query", Query);
+
         Cursor c = db.rawQuery(Query, null);
 
         ArrayList<Event> events = new ArrayList<>();
@@ -353,12 +432,59 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             e.printStackTrace();
         }
         c.close();
+        db.close();
         return events;
     }
+
+    public ArrayList<Event> retrieveEvents(LocalDate startDate, LocalDate endDate) {
+        SQLiteDatabase db = getReadableDatabase();
+
+        String Query = String.format(
+                "SELECT * FROM events WHERE " +
+                        "(%s >= \"%s\" AND %s <= \"%s\") OR " +
+                        "(%s >= \"%s\" AND %s <= \"%s\");",
+                PassionAttendance.KEY_FROM,
+                startDate.toString(),
+                PassionAttendance.KEY_FROM,
+                endDate.toString(),
+                PassionAttendance.KEY_TO,
+                startDate.toString(),
+                PassionAttendance.KEY_TO,
+                endDate.toString()
+        );
+        Log.i("Query", Query);
+
+        Cursor c = db.rawQuery(Query, null);
+
+        ArrayList<Event> events = new ArrayList<>();
+
+        try {
+            c.moveToFirst();
+            while (!c.isAfterLast()) {
+                Integer id = c.getInt(c.getColumnIndex(PassionAttendance.KEY_ID));
+                String title = c.getString(c.getColumnIndex(PassionAttendance.KEY_TITLE));
+                String description = c.getString(c.getColumnIndex(PassionAttendance.KEY_DESCRIPTION));
+                LocalDate from = new LocalDate(c.getString(c.getColumnIndex(PassionAttendance.KEY_FROM)));
+                LocalDate to = new LocalDate(c.getString(c.getColumnIndex(PassionAttendance.KEY_TO)));
+
+                events.add(new Event(id, title, description, from, to));
+
+                c.moveToNext();
+            }
+        } catch (CursorIndexOutOfBoundsException e) {
+            e.printStackTrace();
+        }
+        c.close();
+        db.close();
+        return events;
+    }
+
 
     public ArrayList<Message> retrieveMessages() {
         SQLiteDatabase db = getReadableDatabase();
         String Query = "SELECT * FROM messages;";
+        Log.i("Query", Query);
+
         Cursor c = db.rawQuery(Query, null);
 
         ArrayList<Message> messages = new ArrayList<>();
@@ -380,16 +506,19 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             e.printStackTrace();
         }
         c.close();
+        db.close();
         return messages;
     }
 
     public ArrayList<Message> retrieveMessages(LocalDate d) {
         SQLiteDatabase db = getReadableDatabase();
         String Query = String.format(
-                "SELECT * FROM messages WHERE %s = \"%d\";",
+                "SELECT * FROM messages WHERE %s = \"%s\";",
                 PassionAttendance.KEY_SENT,
-                d.toDate().getTime()
+                d.toString()
         );
+        Log.i("Query", Query);
+
         Cursor c = db.rawQuery(Query, null);
 
         ArrayList<Message> messages = new ArrayList<>();
@@ -411,37 +540,56 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             e.printStackTrace();
         }
         c.close();
+        db.close();
         return messages;
     }
 
-    public Integer getMessagesCount() {
+    public ArrayList<Message> retrieveMessages(LocalDate startDate, LocalDate endDate) {
         SQLiteDatabase db = getReadableDatabase();
         String Query = String.format(
-                "SELECT COUNT(*) AS %s FROM messages;",
-                PassionAttendance.KEY_COUNT
+                "SELECT * FROM messages WHERE %s >= \"%s\" AND %s <= \"%s\";",
+                PassionAttendance.KEY_SENT,
+                startDate.toString(),
+                PassionAttendance.KEY_SENT,
+                endDate.toString()
         );
+        Log.i("Query", Query);
 
         Cursor c = db.rawQuery(Query, null);
 
+        ArrayList<Message> messages = new ArrayList<>();
+
         try {
             c.moveToFirst();
-            Integer count = c.getInt(c.getColumnIndex(PassionAttendance.KEY_COUNT));
-            c.close();
-            return count;
+            while (!c.isAfterLast()) {
+                Integer id = c.getInt(c.getColumnIndex(PassionAttendance.KEY_ID));
+                String title = c.getString(c.getColumnIndex(PassionAttendance.KEY_TITLE));
+                String content = c.getString(c.getColumnIndex(PassionAttendance.KEY_CONTENT));
+                LocalDate sent = new LocalDate(c.getString(c.getColumnIndex(PassionAttendance.KEY_SENT)));
+                Integer type = c.getInt(c.getColumnIndex(PassionAttendance.KEY_TYPE));
+
+                messages.add(new Message(id, title, content, type, sent));
+
+                c.moveToNext();
+            }
         } catch (CursorIndexOutOfBoundsException e) {
-            c.close();
-            return 0;
+            e.printStackTrace();
         }
+        c.close();
+        db.close();
+        return messages;
     }
+
 
     public Integer getMessagesCount(LocalDate d) {
         SQLiteDatabase db = getReadableDatabase();
         String Query = String.format(
-                "SELECT COUNT(*) AS %s FROM messages WHERE %s = \"%d\";",
+                "SELECT COUNT(*) AS %s FROM messages WHERE %s = \"%s\";",
                 PassionAttendance.KEY_COUNT,
-                PassionAttendance.KEY_DATE,
-                d.toDate().getTime()
+                PassionAttendance.KEY_SENT,
+                d.toString()
         );
+        Log.i("Query", Query);
 
         Cursor c = db.rawQuery(Query, null);
 
@@ -449,11 +597,45 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             c.moveToFirst();
             Integer count = c.getInt(c.getColumnIndex(PassionAttendance.KEY_COUNT));
             c.close();
+            db.close();
+            Log.i("Messages Count", count.toString());
             return count;
         } catch (CursorIndexOutOfBoundsException e) {
             c.close();
+            db.close();
             return 0;
         }
+    }
+
+    public ArrayList<Integer> getMessagesCount(LocalDate startDate, LocalDate endDate) {
+        SQLiteDatabase db = getReadableDatabase();
+        ArrayList<Integer> messageCount = new ArrayList<>();
+        String Query = String.format(
+                "SELECT %s, COUNT(*) AS %s FROM messages WHERE %s BETWEEN \"%s\" AND \"%s\" GROUP BY %s;",
+                PassionAttendance.KEY_SENT,
+                PassionAttendance.KEY_COUNT,
+                PassionAttendance.KEY_SENT,
+                startDate.toString(),
+                endDate.toString(),
+                PassionAttendance.KEY_SENT
+        );
+        Log.i("Query", Query);
+
+        Cursor c = db.rawQuery(Query, null);
+
+        try {
+            c.moveToFirst();
+            while (!c.isAfterLast()) {
+                Integer count = c.getInt(c.getColumnIndex(PassionAttendance.KEY_COUNT));
+                messageCount.add(count);
+                c.moveToNext();
+            }
+        } catch (CursorIndexOutOfBoundsException e) {
+            e.printStackTrace();
+        }
+        c.close();
+        db.close();
+        return messageCount;
     }
 
     public Integer getEventsCount() {
@@ -462,6 +644,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 "SELECT COUNT(*) AS %s FROM events;",
                 PassionAttendance.KEY_COUNT
         );
+        Log.i("Query", Query);
 
         Cursor c = db.rawQuery(Query, null);
 
@@ -469,9 +652,36 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             c.moveToFirst();
             Integer count = c.getInt(c.getColumnIndex(PassionAttendance.KEY_COUNT));
             c.close();
+            db.close();
+            Log.i("Events Count", count.toString());
             return count;
         } catch (CursorIndexOutOfBoundsException e) {
             c.close();
+            db.close();
+            return 0;
+        }
+    }
+
+    public Integer getMessagesCount() {
+        SQLiteDatabase db = getReadableDatabase();
+        String Query = String.format(
+                "SELECT COUNT(*) AS %s FROM messages;",
+                PassionAttendance.KEY_COUNT
+        );
+        Log.i("Query", Query);
+
+        Cursor c = db.rawQuery(Query, null);
+
+        try {
+            c.moveToFirst();
+            Integer count = c.getInt(c.getColumnIndex(PassionAttendance.KEY_COUNT));
+            c.close();
+            db.close();
+            Log.i("Messages Count", count.toString());
+            return count;
+        } catch (CursorIndexOutOfBoundsException e) {
+            c.close();
+            db.close();
             return 0;
         }
     }
@@ -479,11 +689,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public Integer getEventsCount(LocalDate d) {
         SQLiteDatabase db = getReadableDatabase();
         String Query = String.format(
-                "SELECT COUNT(*) AS %s FROM events WHERE %s = \"%d\";",
+                "SELECT COUNT(*) AS %s FROM events WHERE %s <= \"%s\" AND %s >= \"%s\";",
                 PassionAttendance.KEY_COUNT,
-                PassionAttendance.KEY_DATE,
-                d.toDate().getTime()
+                PassionAttendance.KEY_FROM,
+                d.toString(),
+                PassionAttendance.KEY_TO,
+                d.toString()
         );
+        Log.i("Query", Query);
 
         Cursor c = db.rawQuery(Query, null);
 
@@ -491,25 +704,67 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             c.moveToFirst();
             Integer count = c.getInt(c.getColumnIndex(PassionAttendance.KEY_COUNT));
             c.close();
+            db.close();
+            Log.i("Events Count", count.toString());
             return count;
         } catch (CursorIndexOutOfBoundsException e) {
             c.close();
+            db.close();
             return 0;
         }
     }
 
+    public ArrayList<Integer> getEventsCount(LocalDate startDate, LocalDate endDate) {
+        SQLiteDatabase db = getReadableDatabase();
+        ArrayList<Integer> eventCount = new ArrayList<>();
+        String Query = String.format(
+                "SELECT %s, %s, COUNT(*) AS %s FROM messages WHERE " +
+                        "(%s BETWEEN \"%s\" AND \"%s\") OR" +
+                        "(%s BETWEEN \"%s\" AND \"%s\") GROUP BY %s;",
+                PassionAttendance.KEY_FROM,
+                PassionAttendance.KEY_TO,
+                PassionAttendance.KEY_COUNT,
+                PassionAttendance.KEY_FROM,
+                startDate.toString(),
+                endDate.toString(),
+                PassionAttendance.KEY_TO,
+                startDate.toString(),
+                endDate.toString(),
+                PassionAttendance.KEY_FROM
+        );
+        Log.i("Query", Query);
+
+        Cursor c = db.rawQuery(Query, null);
+
+        try {
+            c.moveToFirst();
+            while (!c.isAfterLast()) {
+                Integer count = c.getInt(c.getColumnIndex(PassionAttendance.KEY_COUNT));
+                eventCount.add(count);
+                c.moveToNext();
+            }
+        } catch (CursorIndexOutOfBoundsException e) {
+            e.printStackTrace();
+        }
+        c.close();
+        db.close();
+        return eventCount;
+    }
     public boolean deleteEvent(Integer id) {
         SQLiteDatabase db = getWritableDatabase();
         String Query = String.format(
-                "DELETE * FROM events WHERE %s = \"%d\";",
+                "DELETE FROM events WHERE %s = \"%d\";",
                 PassionAttendance.KEY_ID,
                 id
         );
+        Log.i("Query", Query);
 
         try{
             db.execSQL(Query);
+            db.close();
             return true;
         } catch (Exception e){
+            db.close();
             return false;
         }
     }
@@ -517,15 +772,18 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public boolean deleteMessage(Integer id) {
         SQLiteDatabase db = getWritableDatabase();
         String Query = String.format(
-                "DELETE * FROM messages WHERE %s = \"%d\";",
+                "DELETE FROM messages WHERE %s = \"%d\";",
                 PassionAttendance.KEY_ID,
                 id
         );
+        Log.i("Query", Query);
 
         try{
             db.execSQL(Query);
+            db.close();
             return true;
         } catch (Exception e){
+            db.close();
             return false;
         }
     }

@@ -157,4 +157,14 @@ public class Staff {
     public String getPreference(String key){
         return this.preferences.get(key);
     }
+
+    public static Staff getDummyStaff(){
+        return new Staff(
+                1,
+                "Hari Kaji",
+                "Desh ko jhanda Pvt. Ltd.",
+                "https://placehold.it/350x150?text=Hari%20Kaji",
+                "9841448444"
+        );
+    }
 }

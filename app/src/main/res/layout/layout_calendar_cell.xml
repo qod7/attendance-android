@@ -29,15 +29,7 @@
             android:gravity="center_horizontal">
 
             <View
-                android:id="@+id/attendance_indicator"
-                android:layout_width="3dp"
-                android:layout_height="3dp"
-                android:layout_marginLeft="1dp"
-                android:layout_marginRight="1dp"
-                android:background="@drawable/presence_indicator" />
-
-            <View
-                android:id="@+id/notice_indicator"
+                android:id="@+id/message_indicator"
                 android:layout_width="3dp"
                 android:layout_height="3dp"
                 android:layout_marginLeft="1dp"

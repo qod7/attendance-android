@@ -10,12 +10,14 @@ import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -100,6 +102,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         mLoginFormView = findViewById(R.id.login_form_scrollview);
         mProgressView = findViewById(R.id.login_progress);
+
+        if (BuildConfig.DEBUG) {
+            startActivtyWithDummyCredentials();
+        }
     }
 
     private void populateAutoComplete() {
@@ -270,12 +276,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     private boolean isUserIdValid(String email) {
         //TODO: Replace this with your own logic
-        return email.contains("@");
+//        return email.contains("@");
+        return true;
     }
 
     private boolean isPasswordValid(String password) {
         //TODO: Replace this with your own logic
-        return password.length() > 4;
+//        return password.length() > 4;
+        return true;
     }
 
     /**
@@ -376,9 +384,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private void startActivtyWithDummyCredentials() {
         Intent intent = new Intent(LoginActivity.this, OverviewActivity.class);
 
-        intent.putExtra(PassionAttendance.KEY_USER, PassionAttendance.DUMMY_EMAIL);
-        intent.putExtra(PassionAttendance.KEY_PASSWORD, PassionAttendance.DUMMY_PASSWORD);
-        intent.putExtra(PassionAttendance.KEY_TOKEN, PassionAttendance.DUMMY_PASSWORD);
+        intent.putExtra(PassionAttendance.KEY_TOKEN, PassionAttendance.DUMMY_TOKEN);
+
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(
+                LoginActivity.this
+        );
+
+        sp.edit().putString(PassionAttendance.KEY_TOKEN, PassionAttendance.DUMMY_TOKEN).apply();
 
         startActivityForResult(intent, PassionAttendance.ACTIVTY_OVERVIEW);
     }
@@ -389,7 +401,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         switch (requestCode) {
             case PassionAttendance.ACTIVTY_OVERVIEW:
-                finish();
+                if (resultCode == PassionAttendance.ACTION_LOGOUT)
+                    ;
+                else
+                    finish();
                 break;
             default:
                 break;
@@ -404,6 +419,120 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         int ADDRESS = 0;
         int IS_PRIMARY = 1;
+    }
+
+    public void loginWithToken() {
+        final String token = PreferenceManager.getDefaultSharedPreferences(this)
+                .getString(PassionAttendance.KEY_TOKEN, "");
+
+        showProgress(true);
+
+        if (token.isEmpty()) {
+            showProgress(false);
+            return;
+        }
+
+        new AsyncTask<Void, Void, Boolean>() {
+            @Override
+            protected void onPostExecute(Boolean loginStatus) {
+                if (loginStatus){
+                    registerGCM();
+                } else {
+                    showProgress(false);
+                }
+            }
+
+            @Override
+            protected Boolean doInBackground(Void... params) {
+                try {
+                    OkHttpClient httpClient = new OkHttpClient();
+                    httpClient.interceptors().add(new CurlLoggingInterceptor());
+
+                    HttpUrl url = new HttpUrl.Builder()
+                            .scheme("https")
+                            .host(PassionAttendance.HOST)
+                            .addPathSegment("api")
+                            .addPathSegment("login")
+                            .build();
+
+                    Request request = new Request.Builder()
+                            .url(url)
+                            .addHeader("Authorization", "Token " + token)
+                            .addHeader("content-type", "application/json")
+                            .addHeader("cache-control", "no-cache")
+                            .build();
+
+                    Response response = httpClient.newCall(request).execute();
+                    JSONObject r = new JSONObject(response.body().string());
+
+                    return r.getBoolean(PassionAttendance.KEY_STATUS);
+                } catch (IOException | JSONException e) {
+                    return false;
+                }
+            }
+        }.execute();
+
+
+    }
+
+    public void registerGCM() {
+        final String token = PreferenceManager.getDefaultSharedPreferences(this)
+                .getString(PassionAttendance.KEY_TOKEN, "");
+
+        final String gcm_id = PreferenceManager.getDefaultSharedPreferences(this)
+                .getString(PassionAttendance.GCM_ID, "");
+
+        if (token.isEmpty() || gcm_id.isEmpty()) {
+            finish();
+            return;
+        }
+
+        new AsyncTask<Void, Void, Boolean>() {
+            @Override
+            protected void onPostExecute(Boolean status) {
+                Intent intent = new Intent(LoginActivity.this, OverviewActivity.class);
+                intent.putExtra(PassionAttendance.KEY_TOKEN, token);
+
+                startActivityForResult(intent, PassionAttendance.ACTIVTY_OVERVIEW);
+            }
+
+            @Override
+            protected Boolean doInBackground(Void... params) {
+                try {
+                    OkHttpClient httpClient = new OkHttpClient();
+                    httpClient.interceptors().add(new CurlLoggingInterceptor());
+
+
+                    JSONObject body = new JSONObject();
+                    body.put(PassionAttendance.KEY_GCM, gcm_id);
+
+                    HttpUrl url = new HttpUrl.Builder()
+                            .scheme("https")
+                            .host(PassionAttendance.HOST)
+                            .addPathSegment("api")
+                            .addPathSegment("register_gcm")
+                            .build();
+
+                    Request request = new Request.Builder()
+                            .url(url)
+                            .addHeader("Authorization", "Token " + token)
+                            .addHeader("content-type", "application/json")
+                            .addHeader("cache-control", "no-cache")
+                            .post(RequestBody.create(
+                                    MediaType.parse("application/json"),
+                                    body.toString()
+                            ))
+                            .build();
+
+                    Response response = httpClient.newCall(request).execute();
+                    JSONObject r = new JSONObject(response.body().string());
+
+                    return r.getBoolean(PassionAttendance.KEY_STATUS);
+                } catch (IOException | JSONException e) {
+                    return false;
+                }
+            }
+        }.execute();
     }
 
     /**
@@ -459,12 +588,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     if (status) {
                         String token = response.getString("token");
 
-                        Intent intent = new Intent(LoginActivity.this, OverviewActivity.class);
-                        intent.putExtra(PassionAttendance.KEY_USER, mEmail);
-                        intent.putExtra(PassionAttendance.KEY_PASSWORD, mPassword);
-                        intent.putExtra(PassionAttendance.KEY_TOKEN, token);
+                        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(
+                                LoginActivity.this
+                        );
 
-                        startActivityForResult(intent, PassionAttendance.ACTIVTY_OVERVIEW);
+                        sp.edit().putString(PassionAttendance.KEY_TOKEN, token).apply();
+
+                        registerGCM();
                     }
                 } catch (JSONException e) {
                     // If connection cannot be established, login with dummy credentials

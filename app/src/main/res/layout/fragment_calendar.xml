@@ -16,7 +16,8 @@
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:padding="0dp"
-            android:src="@android:drawable/ic_media_previous" />
+            android:scaleType="fitXY"
+            android:src="@drawable/ic_previous" />
 
         <TextView
             android:id="@+id/calendar_month"
@@ -34,7 +35,8 @@
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:padding="0dp"
-            android:src="@android:drawable/ic_media_next" />
+            android:scaleType="fitXY"
+            android:src="@drawable/ic_next" />
     </LinearLayout>
 
     <LinearLayout
