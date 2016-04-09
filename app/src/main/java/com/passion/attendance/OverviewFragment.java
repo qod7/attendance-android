@@ -24,24 +24,21 @@ import org.joda.time.LocalDate;
  */
 public class OverviewFragment extends Fragment {
 
+    public Integer mCurrentView;
     private FragmentTabHost mTabHost;
     private Context mContext;
-
     private View mTodayDetail;
     private View mSelectedDetail;
     private TextView mDateTextView;
     private ImageButton mSwitchViewButton;
     private StaticListView mShiftListView;
     private TextView mTodayOverview;
-
     private EventFragment mEventFragment;
     private AttendanceFragment mAttendanceFragment;
     private InboxFragment mMessageFragment;
     private ImageView mShiftImage;
     private TextView mShiftDay;
     private View mView;
-
-    public Integer mCurrentView;
 
     public OverviewFragment() {
         mContext = getContext();
@@ -245,7 +242,7 @@ public class OverviewFragment extends Fragment {
                 eventCount = db.getEventsCount(selectedDate);
 
 //        Integer msgCount = db.getMessagesCount(),
-//                eventCount = db.getEventsCount();
+//                eventCount = db.getEventsContainer();
 
         setShiftListView();
 

@@ -50,7 +50,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         query = String.format(
                 "CREATE TABLE attendances (%s INTEGER PRIMARY KEY, " +
-                "%s STRING, %s STRING, %s STRING, %s INTEGER);",
+                        "%s STRING, %s STRING, %s STRING, %s INTEGER);",
                 PassionAttendance.KEY_ID,
                 PassionAttendance.KEY_DATE,
                 PassionAttendance.KEY_FROM,
@@ -83,6 +83,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         );
         db.execSQL(query);
         Log.i("Query", query);
+
+        query = String.format(
+                "CREATE TABLE calendar (%s STRING PRIMARY KEY);",
+                PassionAttendance.KEY_DATE
+        );
+        db.execSQL(query);
+        Log.i("Query", query);
+
     }
 
     @Override
@@ -94,7 +102,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public void clearDatabase(){
+    public void clearDatabase() {
         SQLiteDatabase db = getWritableDatabase();
 
         String Query;
@@ -581,13 +589,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     }
 
 
-    public Integer getMessagesCount(LocalDate d) {
+    public Integer getEventsCount() {
         SQLiteDatabase db = getReadableDatabase();
         String Query = String.format(
-                "SELECT COUNT(*) AS %s FROM messages WHERE %s = \"%s\";",
-                PassionAttendance.KEY_COUNT,
-                PassionAttendance.KEY_SENT,
-                d.toString()
+                "SELECT COUNT(*) AS %s FROM events;",
+                PassionAttendance.KEY_COUNT
         );
         Log.i("Query", Query);
 
@@ -598,7 +604,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             Integer count = c.getInt(c.getColumnIndex(PassionAttendance.KEY_COUNT));
             c.close();
             db.close();
-            Log.i("Messages Count", count.toString());
+            Log.i("Events Count", count.toString());
             return count;
         } catch (CursorIndexOutOfBoundsException e) {
             c.close();
@@ -607,42 +613,15 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
     }
 
-    public ArrayList<Integer> getMessagesCount(LocalDate startDate, LocalDate endDate) {
+    public Integer getEventsCount(LocalDate d) {
         SQLiteDatabase db = getReadableDatabase();
-        ArrayList<Integer> messageCount = new ArrayList<>();
         String Query = String.format(
-                "SELECT %s, COUNT(*) AS %s FROM messages WHERE %s BETWEEN \"%s\" AND \"%s\" GROUP BY %s;",
-                PassionAttendance.KEY_SENT,
+                "SELECT COUNT(*) AS %s FROM events WHERE %s <= \"%s\" AND %s >= \"%s\";",
                 PassionAttendance.KEY_COUNT,
-                PassionAttendance.KEY_SENT,
-                startDate.toString(),
-                endDate.toString(),
-                PassionAttendance.KEY_SENT
-        );
-        Log.i("Query", Query);
-
-        Cursor c = db.rawQuery(Query, null);
-
-        try {
-            c.moveToFirst();
-            while (!c.isAfterLast()) {
-                Integer count = c.getInt(c.getColumnIndex(PassionAttendance.KEY_COUNT));
-                messageCount.add(count);
-                c.moveToNext();
-            }
-        } catch (CursorIndexOutOfBoundsException e) {
-            e.printStackTrace();
-        }
-        c.close();
-        db.close();
-        return messageCount;
-    }
-
-    public Integer getEventsCount() {
-        SQLiteDatabase db = getReadableDatabase();
-        String Query = String.format(
-                "SELECT COUNT(*) AS %s FROM events;",
-                PassionAttendance.KEY_COUNT
+                PassionAttendance.KEY_FROM,
+                d.toString(),
+                PassionAttendance.KEY_TO,
+                d.toString()
         );
         Log.i("Query", Query);
 
@@ -686,14 +665,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
     }
 
-    public Integer getEventsCount(LocalDate d) {
+    public Integer getMessagesCount(LocalDate d) {
         SQLiteDatabase db = getReadableDatabase();
         String Query = String.format(
-                "SELECT COUNT(*) AS %s FROM events WHERE %s <= \"%s\" AND %s >= \"%s\";",
+                "SELECT COUNT(*) AS %s FROM messages WHERE %s = \"%s\";",
                 PassionAttendance.KEY_COUNT,
-                PassionAttendance.KEY_FROM,
-                d.toString(),
-                PassionAttendance.KEY_TO,
+                PassionAttendance.KEY_SENT,
                 d.toString()
         );
         Log.i("Query", Query);
@@ -705,7 +682,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             Integer count = c.getInt(c.getColumnIndex(PassionAttendance.KEY_COUNT));
             c.close();
             db.close();
-            Log.i("Events Count", count.toString());
+            Log.i("Messages Count", count.toString());
             return count;
         } catch (CursorIndexOutOfBoundsException e) {
             c.close();
@@ -714,23 +691,18 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
     }
 
-    public ArrayList<Integer> getEventsCount(LocalDate startDate, LocalDate endDate) {
+    public ArrayList<LocalDate> getMessagesContainer(LocalDate startDate, LocalDate endDate) {
+        populateCalendarTable(startDate, endDate);
+
         SQLiteDatabase db = getReadableDatabase();
-        ArrayList<Integer> eventCount = new ArrayList<>();
+        ArrayList<LocalDate> messageContainer = new ArrayList<>();
         String Query = String.format(
-                "SELECT %s, %s, COUNT(*) AS %s FROM messages WHERE " +
-                        "(%s BETWEEN \"%s\" AND \"%s\") OR" +
-                        "(%s BETWEEN \"%s\" AND \"%s\") GROUP BY %s;",
-                PassionAttendance.KEY_FROM,
-                PassionAttendance.KEY_TO,
-                PassionAttendance.KEY_COUNT,
-                PassionAttendance.KEY_FROM,
-                startDate.toString(),
-                endDate.toString(),
-                PassionAttendance.KEY_TO,
-                startDate.toString(),
-                endDate.toString(),
-                PassionAttendance.KEY_FROM
+                "SELECT %s FROM calendar LEFT OUTER JOIN messages WHERE " +
+                        "%s = %s GROUP BY %s;",
+                PassionAttendance.KEY_DATE,
+                PassionAttendance.KEY_DATE,
+                PassionAttendance.KEY_SENT,
+                PassionAttendance.KEY_DATE
         );
         Log.i("Query", Query);
 
@@ -739,8 +711,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         try {
             c.moveToFirst();
             while (!c.isAfterLast()) {
-                Integer count = c.getInt(c.getColumnIndex(PassionAttendance.KEY_COUNT));
-                eventCount.add(count);
+                LocalDate date = new LocalDate(c.getString(c.getColumnIndex(PassionAttendance.KEY_DATE)));
+                messageContainer.add(date);
                 c.moveToNext();
             }
         } catch (CursorIndexOutOfBoundsException e) {
@@ -748,8 +720,73 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
         c.close();
         db.close();
-        return eventCount;
+        return messageContainer;
     }
+
+    public ArrayList<LocalDate> getEventsContainer(LocalDate startDate, LocalDate endDate) {
+        populateCalendarTable(startDate, endDate);
+
+        SQLiteDatabase db = getReadableDatabase();
+        ArrayList<LocalDate> eventContainer = new ArrayList<>();
+
+        String Query = String.format(
+                "SELECT %s FROM calendar LEFT OUTER JOIN events WHERE " +
+                        "(%s >= %s) AND" +
+                        "(%s <= %s) " +
+                        "GROUP BY %s;",
+                PassionAttendance.KEY_DATE,
+                PassionAttendance.KEY_DATE,
+                PassionAttendance.KEY_FROM,
+                PassionAttendance.KEY_DATE,
+                PassionAttendance.KEY_TO,
+                PassionAttendance.KEY_DATE
+        );
+        Log.i("Query", Query);
+
+        Cursor c = db.rawQuery(Query, null);
+
+        try {
+            c.moveToFirst();
+            while (!c.isAfterLast()) {
+                LocalDate date = new LocalDate(c.getString(c.getColumnIndex(PassionAttendance.KEY_DATE)));
+                eventContainer.add(date);
+                c.moveToNext();
+            }
+        } catch (CursorIndexOutOfBoundsException e) {
+            e.printStackTrace();
+        }
+        c.close();
+        db.close();
+        return eventContainer;
+    }
+
+    private boolean populateCalendarTable(LocalDate startDate, LocalDate endDate) {
+        if (startDate.isAfter(endDate)) return false;
+
+        SQLiteDatabase db = getWritableDatabase();
+
+        String Query = "DELETE FROM calendar;";
+        Log.i("Query", Query);
+        db.execSQL(Query);
+
+        LocalDate currentDate = startDate;
+
+        while (!currentDate.isAfter(endDate)) {
+
+            ContentValues values = new ContentValues();
+            values.put(PassionAttendance.KEY_DATE, currentDate.toString());
+            try {
+                db.insertOrThrow("calendar", null, values);
+            } catch (SQLiteConstraintException e) {
+                Log.e("Database Error", e.toString());
+            }
+
+            currentDate = currentDate.plusDays(1);
+        }
+        db.close();
+        return true;
+    }
+
     public boolean deleteEvent(Integer id) {
         SQLiteDatabase db = getWritableDatabase();
         String Query = String.format(
@@ -759,11 +796,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         );
         Log.i("Query", Query);
 
-        try{
+        try {
             db.execSQL(Query);
             db.close();
             return true;
-        } catch (Exception e){
+        } catch (Exception e) {
             db.close();
             return false;
         }
@@ -778,11 +815,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         );
         Log.i("Query", Query);
 
-        try{
+        try {
             db.execSQL(Query);
             db.close();
             return true;
-        } catch (Exception e){
+        } catch (Exception e) {
             db.close();
             return false;
         }

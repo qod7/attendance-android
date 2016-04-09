@@ -29,8 +29,8 @@ public class CalendarAdapter extends BaseAdapter {
 
     private List<LocalDate> DateList;
 
-    private ArrayList<Integer> MessageCount;
-    private ArrayList<Integer> EventCount;
+    private ArrayList<LocalDate> MessageContainer;
+    private ArrayList<LocalDate> EventContainer;
 
     private Context context;
 
@@ -40,8 +40,8 @@ public class CalendarAdapter extends BaseAdapter {
         this.context = context;
 
         this.DateList = new ArrayList<>();
-        this.MessageCount = new ArrayList<>();
-        this.EventCount = new ArrayList<>();
+        this.MessageContainer = new ArrayList<>();
+        this.EventContainer = new ArrayList<>();
 
         GregorianDate = DateTime.now().toLocalDate();
 
@@ -98,12 +98,12 @@ public class CalendarAdapter extends BaseAdapter {
 
             DatabaseHandler db = new DatabaseHandler(context);
 
-//            Boolean messageCondition = MessageCount.get(position) > 0,
-//                    eventCondition = EventCount.get(position) > 0;
 
+//            Boolean messageCondition = db.getMessagesCount(now) > 0,
+//                    eventCondition = db.getEventsContainer(now) > 0;
 
-            Boolean messageCondition = db.getMessagesCount(now) > 0,
-                    eventCondition = db.getEventsCount(now) > 0;
+            Boolean messageCondition = MessageContainer.contains(now),
+                    eventCondition = EventContainer.contains(now);
 
             int VISIBLE = View.VISIBLE, GONE = View.GONE;
 
@@ -185,8 +185,8 @@ public class CalendarAdapter extends BaseAdapter {
         NepaliDate tempNepaliDate;
 
         DateList.clear();
-        EventCount.clear();
-        MessageCount.clear();
+        EventContainer.clear();
+        MessageContainer.clear();
 
         try {
             tempNepaliDate = NepaliCalendar.convertGregorianToNepaliDate(currentDate.toDate());
@@ -216,7 +216,19 @@ public class CalendarAdapter extends BaseAdapter {
                     DateList.add(tempGregorianDate);
                     tempGregorianDate = tempGregorianDate.plusDays(1);
                 }
+            DatabaseHandler db = new DatabaseHandler(context);
+            LocalDate startDate = DateList.get(0),
+                    endDate = DateList.get(DateList.size() - 1);
 
+            MessageContainer = db.getMessagesContainer(
+                    startDate,
+                    endDate
+            );
+
+            EventContainer = db.getEventsContainer(
+                    startDate,
+                    endDate
+            );
 
         } catch (NepaliDateException e) {
             e.printStackTrace();
